@@ -1,147 +1,98 @@
 "use client";
 import { useState, useEffect } from "react";
-import { databases, ID } from "../../lib/appwrite";
-import toast from "react-hot-toast";
+import { useNotesStore } from "../../stores/useNotesStore";
+import { useMedicalHistoryStore } from "../../stores/useMedicalHistoryStore";
+import { useTreatmentPlanStore } from "../../stores/useTreatmentPlanStore";
 
-import { Query } from "appwrite";
+const sectionMap = {
+  notes: useNotesStore,
+  medicalhistory: useMedicalHistoryStore,
+  treatmentplans: useTreatmentPlanStore,
+};
 
-export default function SubsectionModal({
-  open,
-  onClose,
-  section, // { label, collectionId }
+export default function SubSectionModal({
+  title,
+  collectionId,
   patientId,
+  onClose,
 }) {
-  const [formData, setFormData] = useState({ title: "", content: "" });
-  const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState([]); // list of entries
-  const [fetching, setFetching] = useState(true);
+  const useStore = sectionMap[collectionId];
+  const { items, fetchItems, addItem, deleteItem, loading } = useStore();
+  const [form, setForm] = useState({ title: "", content: "" });
 
-  // Fetch existing entries
   useEffect(() => {
-    if (!open || !patientId || !section?.collectionId) return;
-    const fetchData = async () => {
-      setFetching(true);
-      try {
-        const res = await databases.listDocuments(
-          process.env.NEXT_PUBLIC_DATABASE_ID,
-          section.collectionId,
-          [Query.equal("patientId", patientId), Query.orderDesc("$createdAt")]
-        );
-        setItems(res.documents);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load data");
-      } finally {
-        setFetching(false);
-      }
-    };
-    fetchData();
-  }, [open, patientId, section]);
+    fetchItems(patientId);
+  }, [patientId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value ?? "" }));
+  const handleAdd = async () => {
+    await addItem(patientId, form.title, form.content);
+    setForm({ title: "", content: "" });
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title.trim()) return toast.error("Title is required");
-
-    setLoading(true);
-    try {
-      await databases.createDocument(
-        process.env.NEXT_PUBLIC_DATABASE_ID,
-        section.collectionId,
-        ID.unique(),
-        {
-          patientId,
-          name: formData.title,
-          description: formData.content,
-        }
-      );
-      toast.success(`${section.label} added!`);
-      setFormData({ title: "", content: "" });
-      // refresh list
-      const res = await databases.listDocuments(
-        process.env.NEXT_PUBLIC_DATABASE_ID,
-        section.collectionId,
-        [Query.equal("patientId", patientId), Query.orderDesc("$createdAt")]
-      );
-      setItems(res.documents);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
-      <div className="bg-base-100 p-6 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl">
-        <h2 className="text-xl font-semibold mb-4">{section.label}</h2>
+    <dialog open className="modal modal-open z-[1000]">
+      <div className="modal-box max-w-lg">
+        <div className="flex justify-between items-center border-b pb-2 mb-3">
+          <h3 className="font-bold text-lg">{title}</h3>
+          <button onClick={onClose} className="btn btn-sm btn-ghost">
+            ✕
+          </button>
+        </div>
 
-        {/* Existing Entries */}
-        {fetching ? (
-          <div className="text-center text-gray-500 py-4">Loading...</div>
-        ) : items.length === 0 ? (
-          <div className="text-center text-gray-400 italic mb-4">
-            No records yet.
-          </div>
-        ) : (
-          <ul className="space-y-2 mb-5">
-            {items.map((item) => (
-              <li
-                key={item.$id}
-                className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg"
+        <div className="max-h-60 overflow-y-auto space-y-2 mb-4">
+          {items.length > 0 ? (
+            items.map((i) => (
+              <div
+                key={i.$id}
+                className="bg-base-200 p-3 rounded-md flex justify-between items-start"
               >
-                <p className="font-semibold text-gray-800 dark:text-gray-200">
-                  {item.description}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
-                  {item.content}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {new Date(item.$createdAt).toLocaleString()}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+                <div>
+                  <h4 className="font-semibold">{i.title}</h4>
+                  <p className="text-sm opacity-80">{i.content}</p>
+                </div>
+                <button
+                  className="btn btn-xs btn-error"
+                  onClick={() => deleteItem(i.$id)}
+                >
+                  ✕
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">No records found.</p>
+          )}
+        </div>
 
-        {/* Add New Entry Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            name="title"
-            placeholder="Title"
-            className="input input-bordered w-full"
-            value={formData.title}
-            onChange={handleChange}
-          />
-          <textarea
-            name="content"
-            placeholder="Content"
-            className="textarea textarea-bordered w-full"
-            value={formData.content}
-            onChange={handleChange}
-          />
-          <div className="flex justify-end gap-2 pt-3">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>
-              Close
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Add"}
-            </button>
-          </div>
-        </form>
+        <input
+          type="text"
+          placeholder="Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className="input input-bordered w-full mb-2"
+        />
+        <textarea
+          placeholder="Content"
+          value={form.content}
+          onChange={(e) => setForm({ ...form, content: e.target.value })}
+          className="textarea textarea-bordered w-full"
+        />
+
+        <div className="modal-action">
+          <button
+            onClick={handleAdd}
+            className={`btn btn-primary ${loading ? "loading" : ""}`}
+          >
+            Add
+          </button>
+          <button className="btn btn-ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
-    </div>
+
+      <form method="dialog" className="modal-backdrop">
+        <button onClick={onClose}>close</button>
+      </form>
+    </dialog>
   );
 }
