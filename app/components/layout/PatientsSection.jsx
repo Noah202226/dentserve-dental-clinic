@@ -1,46 +1,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  FiUserPlus,
-  FiSearch,
-  FiEye,
-  FiPhone,
-  FiClipboard,
-} from "react-icons/fi";
+import { FiUserPlus, FiSearch } from "react-icons/fi";
 import AddPatientModal from "../helper/AddPatientModal";
-import { usePatientStore } from "@/app/stores/usePatientStore";
 import ViewPatientDetailsModal from "../helper/ViewPatientDetailsModal";
+import { usePatientStore } from "@/app/stores/usePatientStore";
 
 export default function PatientsSection() {
   const [isOpen, setIsOpen] = useState(false);
-
-  const { patients, fetchPatients, addPatient } = usePatientStore();
-
-  const [selectedPatient, setSelectedPatient] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleView = (patient) => {
-    setIsModalOpen(true);
-    setSelectedPatient(patient);
-  };
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    patient: null,
+  });
+
+  const { patients, fetchPatients, addPatient, deletePatient } =
+    usePatientStore();
+
+  const [loading, setLoading] = useState(false); // ✅ loading state for add
+  const [deleteLoading, setDeleteLoading] = useState(false); // optional for delete
 
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
 
-  const [formData, setFormData] = useState({
-    activeTab: "general",
-    name: "",
-    age: "",
-    contact: "",
-    balance: "",
-    dateAdded: "",
-    medicalHistory: "",
-    treatmentPlan: "",
-    notes: "",
-    prescriptions: "",
-    payments: "",
-  });
+  const handleView = (patient) => {
+    setSelectedPatient(patient);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = (patient) => {
+    setConfirmModal({ isOpen: true, patient });
+  };
+
+  const handleDelete = async () => {
+    try {
+      setDeleteLoading(true);
+      await deletePatient(confirmModal.patient.$id);
+      setConfirmModal({ isOpen: false, patient: null });
+      fetchPatients();
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleSavePatient = async (newData) => {
+    try {
+      setLoading(true);
+      await addPatient(newData);
+      setIsOpen(false);
+      fetchPatients();
+    } catch (err) {
+      console.error("Add patient failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -49,11 +67,24 @@ export default function PatientsSection() {
         <h1 className="text-2xl font-bold">👥 Patients</h1>
         <button
           onClick={() => setIsOpen(true)}
-          className="btn btn-primary flex items-center gap-2"
+          className={`btn btn-primary flex items-center gap-2 ${
+            loading ? "opacity-70 cursor-not-allowed" : ""
+          }`}
+          disabled={loading}
         >
-          <FiUserPlus /> Add Patient
+          {loading ? (
+            <>
+              <span className="loading loading-spinner loading-sm"></span>
+              Adding...
+            </>
+          ) : (
+            <>
+              <FiUserPlus /> Add Patient
+            </>
+          )}
         </button>
       </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="stat bg-base-200 rounded-xl p-4 shadow">
@@ -73,6 +104,7 @@ export default function PatientsSection() {
           </div>
         </div>
       </div>
+
       {/* Search */}
       <div className="flex flex-col h-full">
         <label className="input input-bordered flex items-center gap-2 w-full md:w-1/3">
@@ -83,8 +115,8 @@ export default function PatientsSection() {
             placeholder="Search patients..."
           />
         </label>
-        {/* Patients Table */}
-        {/* Table wrapper with max-height */}
+
+        {/* Table Wrapper */}
         <div className="flex-1 overflow-hidden">
           <div className="h-75 overflow-y-auto pr-2">
             {/* Desktop Table */}
@@ -111,13 +143,19 @@ export default function PatientsSection() {
                         >
                           View
                         </button>
-                        {/* <button className="btn btn-outline btn-sm">Call</button> */}
+                        <button
+                          className="btn btn-error btn-sm"
+                          onClick={() => handleDeleteConfirm(patient)}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
             {/* Mobile Card Layout */}
             <div className="grid gap-4 md:hidden">
               {patients.map((patient) => (
@@ -126,7 +164,7 @@ export default function PatientsSection() {
                   className="card bg-base-200 shadow-md p-4 rounded-lg"
                 >
                   <h2 className="font-semibold text-lg">
-                    {patient.patient_name}
+                    {patient.patientName}
                   </h2>
                   <p className="text-sm text-gray-400">{patient.address}</p>
                   <p className="text-sm">{patient.contact}</p>
@@ -137,8 +175,11 @@ export default function PatientsSection() {
                     >
                       View
                     </button>
-                    <button className="btn btn-outline btn-sm flex-1">
-                      Call
+                    <button
+                      className="btn btn-error btn-sm flex-1"
+                      onClick={() => handleDeleteConfirm(patient)}
+                    >
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -148,30 +189,59 @@ export default function PatientsSection() {
         </div>
       </div>
 
+      {/* Add Patient Modal */}
       <AddPatientModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        onSave={(newData) => {
-          const newPatient = {
-            id: patients.length + 1,
-            name: newData.name,
-            age: parseInt(newData.age) || 0,
-            contact: newData.contact,
-            balance: parseFloat(newData.balance) || 0,
-            dateAdded: newData.dateAdded,
-            medicalHistory: newData.medicalHistory,
-            treatmentPlan: newData.treatmentPlan,
-            notes: newData.notes,
-            prescriptions: newData.prescriptions,
-          };
-        }}
+        onSave={handleSavePatient}
+        loading={loading} // ✅ pass to modal
       />
 
+      {/* View Patient Modal */}
       <ViewPatientDetailsModal
         patient={selectedPatient}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {/* Delete Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <dialog open className="modal">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-error">Confirm Delete</h3>
+            <p className="py-3">
+              Are you sure you want to delete{" "}
+              <strong>{confirmModal.patient?.patientName}</strong>? <br />
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                className="btn btn-outline"
+                onClick={() =>
+                  setConfirmModal({ isOpen: false, patient: null })
+                }
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-error"
+                onClick={handleDelete}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  "Yes, Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
     </div>
   );
 }

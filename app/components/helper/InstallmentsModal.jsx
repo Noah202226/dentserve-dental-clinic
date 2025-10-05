@@ -86,7 +86,7 @@ export default function InstallmentsModal({ transaction, onClose }) {
         transaction.$id,
         {
           paid: totalPaid + newPaid,
-          //   remaining: newRemaining,
+          remaining: newRemaining,
           status: newRemaining <= 0 ? "paid" : "ongoing",
         }
       );
@@ -177,37 +177,43 @@ export default function InstallmentsModal({ transaction, onClose }) {
         </div>
 
         {/* Add Payment Form */}
-        <div className="border-t border-gray-700 p-4">
-          <form onSubmit={handleAddPayment} className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <input
-                type="number"
-                name="amount"
-                placeholder="Enter payment amount"
-                value={form.amount}
+        {remaining > 0 ? (
+          <div className="border-t border-gray-700 p-4">
+            <form onSubmit={handleAddPayment} className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  name="amount"
+                  placeholder="Enter payment amount"
+                  value={form.amount}
+                  onChange={handleChange}
+                  className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full"
+                  required
+                  min="1"
+                  max={remaining}
+                />
+                <button
+                  type="submit"
+                  disabled={adding}
+                  className="flex items-center gap-1 bg-primary text-white px-3 py-2 rounded-lg hover:bg-primary/80 transition"
+                >
+                  <Plus size={16} /> {adding ? "Adding..." : "Add"}
+                </button>
+              </div>
+              <textarea
+                name="note"
+                placeholder="Optional note"
+                value={form.note}
                 onChange={handleChange}
-                className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full"
-                required
-                min="1"
-                max={remaining}
-              />
-              <button
-                type="submit"
-                disabled={adding}
-                className="flex items-center gap-1 bg-primary text-white px-3 py-2 rounded-lg hover:bg-primary/80 transition"
-              >
-                <Plus size={16} /> {adding ? "Adding..." : "Add"}
-              </button>
-            </div>
-            <textarea
-              name="note"
-              placeholder="Optional note"
-              value={form.note}
-              onChange={handleChange}
-              className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 text-sm"
-            ></textarea>
-          </form>
-        </div>
+                className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 text-sm"
+              ></textarea>
+            </form>
+          </div>
+        ) : (
+          <p className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 text-sm text-right">
+            Payment Completed
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,14 @@
 "use client";
 
 import { create } from "zustand";
-import { databases, ID } from "../lib/appwrite"; // adjust path
+import { databases, ID } from "../lib/appwrite";
+import { Query } from "appwrite";
 import toast from "react-hot-toast";
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
 const PATIENTS_COLLECTION_ID = "patients";
+const TRANSACTIONS_COLLECTION_ID = "transactions"; // 👈 add this
+const INSTALLMENTS_COLLECTION_ID = "installments"; // 👈 optional if used
 
 export const usePatientStore = create((set, get) => ({
   patients: [],
@@ -29,6 +32,7 @@ export const usePatientStore = create((set, get) => ({
 
   // ✅ Add new patient
   addPatient: async (patientData) => {
+    set({ loading: true });
     try {
       const res = await databases.createDocument(
         DATABASE_ID,
@@ -39,17 +43,20 @@ export const usePatientStore = create((set, get) => ({
 
       set((state) => ({
         patients: [...state.patients, res],
+        loading: false,
       }));
 
       toast.success("Patient added successfully!");
     } catch (error) {
       console.error("Error adding patient:", error);
       toast.error("Failed to add patient");
+      set({ loading: false });
     }
   },
 
   // ✅ Update patient
   updatePatient: async (id, updates) => {
+    set({ loading: true });
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
@@ -60,28 +67,76 @@ export const usePatientStore = create((set, get) => ({
 
       set((state) => ({
         patients: state.patients.map((p) => (p.$id === id ? res : p)),
+        loading: false,
       }));
 
       toast.success("Patient updated!");
     } catch (error) {
       console.error("Error updating patient:", error);
       toast.error("Failed to update patient");
+      set({ loading: false });
     }
   },
 
-  // ✅ Remove patient
-  removePatient: async (id) => {
+  // ✅ Delete patient and related records
+  deletePatient: async (id) => {
+    set({ loading: true });
     try {
+      // 1️⃣ Fetch related transactions
+      const transactions = await databases.listDocuments(
+        DATABASE_ID,
+        TRANSACTIONS_COLLECTION_ID,
+        [Query.equal("patientId", id)]
+      );
+
+      console.log(id, transactions);
+
+      // 2️⃣ Delete each transaction
+      await Promise.all(
+        transactions.documents.map((t) =>
+          databases.deleteDocument(
+            DATABASE_ID,
+            TRANSACTIONS_COLLECTION_ID,
+            t.$id
+          )
+        )
+      );
+
+      // 3️⃣ (Optional) Delete related installments too
+      try {
+        const installments = await databases.listDocuments(
+          DATABASE_ID,
+          INSTALLMENTS_COLLECTION_ID,
+          [Query.equal("patientId", id)]
+        );
+
+        await Promise.all(
+          installments.documents.map((i) =>
+            databases.deleteDocument(
+              DATABASE_ID,
+              INSTALLMENTS_COLLECTION_ID,
+              i.$id
+            )
+          )
+        );
+      } catch (e) {
+        console.warn("No installments collection or records found");
+      }
+
+      // 4️⃣ Delete the patient document
       await databases.deleteDocument(DATABASE_ID, PATIENTS_COLLECTION_ID, id);
 
+      // 5️⃣ Update local state
       set((state) => ({
         patients: state.patients.filter((p) => p.$id !== id),
+        loading: false,
       }));
 
-      toast("Patient removed", { icon: "🗑️" });
+      toast.success("Patient and related records deleted 🗑️");
     } catch (error) {
-      console.error("Error removing patient:", error);
-      toast.error("Failed to remove patient");
+      console.error("Error deleting patient and related data:", error);
+      toast.error("Failed to delete patient");
+      set({ loading: false });
     }
   },
 }));

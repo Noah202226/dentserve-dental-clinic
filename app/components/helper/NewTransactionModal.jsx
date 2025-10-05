@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
 const COLLECTION_TRANSACTIONS = "transactions";
 const COLLECTION_SERVICES = "services";
+const COLLECTION_INSTALLMENTS = "installments";
 
 export default function NewTransactionModal({ patient, onClose, onSaved }) {
   const [form, setForm] = useState({
@@ -16,14 +17,12 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
     totalAmount: "",
     paymentType: "",
     initialPay: "",
-    paid: 0,
-    status: "unpaid",
   });
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Load available services from Appwrite
+  // 🔹 Load available services
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -39,7 +38,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
     fetchServices();
   }, []);
 
-  // 🔹 Handle service change
+  // 🔹 Handle service select
   const handleServiceChange = (e) => {
     const selectedId = e.target.value;
     const selectedService = services.find((s) => s.$id === selectedId);
@@ -48,18 +47,15 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
       ...prev,
       serviceId: selectedService?.$id || "",
       serviceName: selectedService?.serviceName || "",
-      servicePrice: Number(selectedService?.servicePrice) || 0,
-      totalAmount: Number(selectedService?.servicePrice) || "",
+      servicePrice: selectedService?.servicePrice || 0,
+      totalAmount: selectedService?.servicePrice || "",
     }));
   };
 
-  // 🔹 Handle input change
+  // 🔹 Input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   // 🔹 Compute remaining balance
@@ -68,19 +64,17 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
       ? Math.max(form.servicePrice - Number(form.initialPay || 0), 0)
       : 0;
 
-  // 🔹 Handle form submission — always CREATE new record
+  // 🔹 Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Determine how much is paid upfront
       const paidAmount =
         form.paymentType === "installment"
-          ? Number(form.initialPay || 0)
-          : Number(form.totalAmount || 0);
+          ? Number(form.initialPay)
+          : Number(form.totalAmount);
 
-      // Determine status
       const statusValue =
         paidAmount >= form.servicePrice
           ? "paid"
@@ -88,23 +82,42 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
           ? "ongoing"
           : "unpaid";
 
-      // Create new transaction record in Appwrite
-      await databases.createDocument(
+      // 🔹 1️⃣ Create main transaction record
+      const transactionRes = await databases.createDocument(
         DATABASE_ID,
         COLLECTION_TRANSACTIONS,
         ID.unique(),
         {
-          patientId: patient?.$id,
-          totalAmount: Number(form.servicePrice),
-          serviceName: form.serviceName,
+          patientId: patient.$id,
           serviceId: form.serviceId,
+          serviceName: form.serviceName,
+          totalAmount: Number(form.servicePrice),
           paymentType: form.paymentType,
           paid: paidAmount,
           status: statusValue,
+          remaining: remainingBalance,
         }
       );
 
-      onSaved?.(); // refresh list
+      // 🔹 2️⃣ If installment, add initial payment record to `installments`
+      if (form.paymentType === "installment" && Number(form.initialPay) > 0) {
+        await databases.createDocument(
+          DATABASE_ID,
+          COLLECTION_INSTALLMENTS,
+          ID.unique(),
+          {
+            transactionId: transactionRes.$id, // 🔗 link to parent
+            amount: Number(form.initialPay),
+            dateTransact: new Date().toISOString(),
+            patientId: patient.$id,
+            serviceName: form.serviceName,
+            remaining: Number(form.servicePrice) - Number(form.initialPay),
+            note: "Initial payment",
+          }
+        );
+      }
+
+      onSaved();
       onClose();
     } catch (err) {
       console.error("Error creating transaction:", err);
@@ -112,8 +125,6 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
       setLoading(false);
     }
   };
-
-  if (!patient) return null;
 
   return (
     <div className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex justify-center items-center">
@@ -128,7 +139,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 h-full">
-          {/* Service Selection */}
+          {/* Service selection */}
           <div>
             <label className="block text-sm mb-1 font-medium">Service</label>
             <select
@@ -147,7 +158,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
             </select>
           </div>
 
-          {/* Service Price */}
+          {/* Price */}
           {form.servicePrice > 0 && (
             <div className="text-sm text-gray-400">
               Service Price:{" "}
@@ -175,7 +186,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
             </select>
           </div>
 
-          {/* Initial Pay (only if installment) */}
+          {/* Initial Payment */}
           {form.paymentType === "installment" && (
             <>
               <div>

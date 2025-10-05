@@ -152,9 +152,14 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
                       <p className="font-bold text-lg text-primary">
                         ₱{Number(t.paid || 0).toLocaleString()}
                       </p>
-                      {t.remaining > 0 && (
+                      {t.remaining > 0 ? (
                         <p className="text-xs text-gray-400">
                           Remaining: ₱{Number(t.remaining).toLocaleString()}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-green-400">
+                          (PAID) Remaining: ₱
+                          {Number(t.remaining).toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -194,6 +199,7 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
           patient={patient}
           onClose={() => setOpenNewModal(false)}
           onSaved={fetchTransactions}
+          mainTransactionId={patient?.$id}
         />
       )}
 

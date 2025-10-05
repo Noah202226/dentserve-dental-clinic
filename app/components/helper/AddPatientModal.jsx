@@ -1,196 +1,236 @@
 "use client";
 
-import { FiClipboard } from "react-icons/fi";
 import { useState } from "react";
+import { FiLoader } from "react-icons/fi";
 
-export default function AddPatientModal({ isOpen, setIsOpen, onSave }) {
-  const [formData, setFormData] = useState({
-    activeTab: "general",
-    name: "",
-    age: "",
+export default function AddPatientModal({
+  isOpen,
+  setIsOpen,
+  onSave,
+  loading,
+}) {
+  const [form, setForm] = useState({
+    patientName: "",
+    address: "",
+    birthdate: "",
+    gender: "",
     contact: "",
-    dateAdded: "",
-    medicalHistory: "",
-    treatmentPlan: "",
-    notes: "",
-    prescriptions: "",
-    payments: "",
-    balance: "",
+    emergencyToContact: "",
+    emergencyToContactNumber: "",
+    note: "",
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData); // pass back to parent
-    setFormData({
-      activeTab: "general",
-      name: "",
-      age: "",
-      contact: "",
-      dateAdded: "",
-      medicalHistory: "",
-      treatmentPlan: "",
-      notes: "",
-      prescriptions: "",
-      payments: "",
-      balance: "",
-    });
-    setIsOpen(false);
+  const handleSave = () => {
+    if (!form.patientName || !form.contact) return;
+    onSave(form);
   };
-
-  if (!isOpen) return null;
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-3xl">
-        <h3 className="font-bold text-lg flex items-center gap-2 mb-4">
-          <FiClipboard /> Add New Patient
-        </h3>
+    <>
+      <dialog
+        id="add_patient_modal"
+        className={`modal ${isOpen ? "modal-open" : ""}`}
+      >
+        <div className="modal-box max-w-3xl bg-base-200 text-base-content rounded-2xl shadow-2xl border border-base-300">
+          <h3 className="font-bold text-2xl mb-4 text-primary flex items-center gap-2">
+            🧾 Add New Patient
+          </h3>
 
-        {/* Tabs */}
-        <div role="tablist" className="tabs tabs-boxed mb-4">
-          {["general", "medical", "financial"].map((tab) => (
-            <button
-              key={tab}
+          {/* Tabs */}
+          <div role="tablist" className="tabs tabs-boxed bg-base-300 mb-5">
+            <input
+              type="radio"
+              name="tabset"
               role="tab"
-              className={`tab ${
-                formData.activeTab === tab ? "tab-active" : ""
-              }`}
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, activeTab: tab }))
-              }
+              className="tab"
+              aria-label="General Info"
+              defaultChecked
+              id="tab-general"
+            />
+            <div
+              role="tabpanel"
+              className="tab-content p-4 bg-base-200"
+              htmlFor="tab-general"
             >
-              {tab === "general"
-                ? "General Info"
-                : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* General Info */}
-          {formData.activeTab === "general" && (
-            <div className="space-y-3">
-              <div className="form-control">
-                <label className="label">Full Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter full name"
-                  className="input input-bordered"
-                  required
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Age</label>
-                <input
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  placeholder="Enter age"
-                  className="input input-bordered"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Contact</label>
-                <input
-                  type="text"
-                  name="contact"
-                  value={formData.contact}
-                  onChange={handleChange}
-                  placeholder="Enter contact number"
-                  className="input input-bordered"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Date Added</label>
-                <input
-                  type="date"
-                  name="dateAdded"
-                  value={formData.dateAdded}
-                  onChange={handleChange}
-                  className="input input-bordered"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Medical */}
-          {formData.activeTab === "medical" && (
-            <div className="space-y-3">
-              <div className="form-control">
-                <label className="label">Medical History</label>
-                <textarea
-                  name="medicalHistory"
-                  value={formData.medicalHistory}
-                  onChange={handleChange}
-                  className="textarea textarea-bordered"
-                  placeholder="Enter medical history"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Treatment Plan</label>
-                <textarea
-                  name="treatmentPlan"
-                  value={formData.treatmentPlan}
-                  onChange={handleChange}
-                  className="textarea textarea-bordered"
-                  placeholder="Enter treatment plan"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">Full Name</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="patientName"
+                    placeholder="Enter full name"
+                    value={form.patientName}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">Gender</span>
+                  </label>
+                  <select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleChange}
+                    className="select select-bordered w-full bg-base-300"
+                  >
+                    <option value="">Select</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">Birthdate</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="birthdate"
+                    value={form.birthdate}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">
+                      Contact Number
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    name="contact"
+                    placeholder="Enter contact number"
+                    value={form.contact}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-300">Address</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Enter address"
+                    value={form.address}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Financial */}
-          {formData.activeTab === "financial" && (
-            <div className="space-y-3">
-              <div className="form-control">
-                <label className="label">Payments</label>
-                <input
-                  type="number"
-                  name="payments"
-                  value={formData.payments}
-                  onChange={handleChange}
-                  placeholder="Enter payment amount"
-                  className="input input-bordered"
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">Balance</label>
-                <input
-                  type="number"
-                  name="balance"
-                  value={formData.balance}
-                  onChange={handleChange}
-                  placeholder="Enter balance"
-                  className="input input-bordered"
-                />
+            <input
+              type="radio"
+              name="tabset"
+              role="tab"
+              className="tab"
+              aria-label="Emergency"
+              id="tab-emergency"
+            />
+            <div
+              role="tabpanel"
+              className="tab-content p-4 bg-base-200"
+              htmlFor="tab-emergency"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">
+                      Emergency Contact Name
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    name="emergencyToContact"
+                    placeholder="Enter emergency contact name"
+                    value={form.emergencyToContact}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-300">
+                      Emergency Contact Number
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    name="emergencyToContactNumber"
+                    placeholder="Enter emergency number"
+                    value={form.emergencyToContactNumber}
+                    onChange={handleChange}
+                    className="input input-bordered w-full bg-base-300"
+                  />
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Actions */}
-          <div className="modal-action">
+            <input
+              type="radio"
+              name="tabset"
+              role="tab"
+              className="tab"
+              aria-label="Note"
+              id="tab-note"
+            />
+            <div
+              role="tabpanel"
+              className="tab-content p-4 bg-base-200"
+              htmlFor="tab-note"
+            >
+              <label className="label">
+                <span className="label-text text-gray-300">
+                  Additional Notes
+                </span>
+              </label>
+              <textarea
+                name="note"
+                placeholder="Enter any important notes..."
+                value={form.note}
+                onChange={handleChange}
+                className="textarea textarea-bordered w-full h-32 bg-base-300"
+              />
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end mt-6 gap-3">
             <button
-              type="button"
+              className="btn btn-ghost"
               onClick={() => setIsOpen(false)}
-              className="btn"
+              disabled={loading}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Save
+            <button
+              className={`btn btn-primary ${loading ? "btn-disabled" : ""}`}
+              onClick={handleSave}
+            >
+              {loading ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" /> Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </button>
           </div>
+        </div>
+
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={() => setIsOpen(false)}>close</button>
         </form>
-      </div>
-    </div>
+      </dialog>
+    </>
   );
 }
