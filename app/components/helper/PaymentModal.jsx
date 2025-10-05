@@ -1,138 +1,208 @@
 "use client";
-import { useState, useEffect } from "react";
-import { usePaymentStore } from "../../stores/usePaymentStore";
-import dayjs from "dayjs";
 
-export default function PaymentModal({ patientId, onClose }) {
-  const {
-    loading,
-    transactions,
-    installments,
-    fetchPayments,
-    addTransaction,
-    addInstallment,
-  } = usePaymentStore();
-  const [activeTab, setActiveTab] = useState("full");
-  const [amount, setAmount] = useState("");
-  const [adding, setAdding] = useState(false);
+import { useEffect, useState } from "react";
+import { databases, ID } from "../../lib/appwrite";
+import { Query } from "appwrite";
+import { X, Plus, Trash2, Loader2 } from "lucide-react";
+import dayjs from "dayjs";
+import NewTransactionModal from "./NewTransactionModal";
+import InstallmentsModal from "./InstallmentsModal";
+
+const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
+const COLLECTION_TRANSACTIONS = "transactions";
+
+export default function PaymentModal({ isOpen, onClose, patient }) {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState({ totalPaid: 0, totalRemaining: 0 });
+  const [openNewModal, setOpenNewModal] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const [selectedInstallment, setSelectedInstallment] = useState(null);
+
+  // 🔹 Fetch transactions
+  const fetchTransactions = async () => {
+    if (!patient?.$id) return;
+    try {
+      setLoading(true);
+      const res = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTION_TRANSACTIONS,
+        [Query.equal("patientId", patient.$id), Query.orderDesc("$createdAt")]
+      );
+
+      const docs = res.documents;
+      const totalPaid = docs.reduce((sum, t) => sum + Number(t.paid || 0), 0);
+      const totalRemaining = docs.reduce(
+        (sum, t) => sum + Number(t.remaining || 0),
+        0
+      );
+
+      setTransactions(docs);
+      setSummary({ totalPaid, totalRemaining });
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Delete a transaction
+  const handleDelete = async (id) => {
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this transaction?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingId(id);
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_TRANSACTIONS, id);
+      setTransactions((prev) => prev.filter((t) => t.$id !== id));
+    } catch (err) {
+      console.error("Error deleting transaction:", err);
+      alert("Failed to delete transaction.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
-    if (patientId) fetchPayments(patientId);
-  }, [patientId]);
-
-  const handleAdd = async () => {
-    if (!amount.trim()) return;
-    setAdding(true);
-    try {
-      if (activeTab === "full") {
-        // Save full payment only in transactions
-        await addTransaction(patientId, amount, "Full Payment");
-      } else {
-        // Save in both transactions + installments
-        await addTransaction(patientId, amount, "Installment");
-        await addInstallment(patientId, amount, new Date().toISOString());
-      }
-      setAmount("");
-      await fetchPayments(patientId); // refresh list
-    } catch (err) {
-      console.error("Error adding payment:", err);
+    if (isOpen && patient?.$id) {
+      fetchTransactions();
     }
-    setAdding(false);
-  };
+  }, [isOpen, patient]);
 
-  const renderList = (data) => {
-    if (loading)
-      return [...Array(3)].map((_, i) => (
-        <div key={i} className="animate-pulse bg-base-200 h-14 rounded-md" />
-      ));
-    if (!data?.length)
-      return (
-        <p className="text-gray-400 text-sm text-center py-6">
-          No {activeTab === "full" ? "payments" : "installments"} yet.
-        </p>
-      );
-    return data.map((p) => (
-      <div
-        key={p.$id}
-        className="flex justify-between items-center bg-base-200 rounded-md p-3"
-      >
-        <span className="font-medium">₱{parseFloat(p.amount).toFixed(2)}</span>
-        <span className="text-xs opacity-70">
-          {p.dateTransact
-            ? dayjs(p.dateTransact).format("MMM D, YYYY")
-            : dayjs(p.$createdAt).format("MMM D, YYYY")}
-        </span>
-      </div>
-    ));
-  };
+  if (!isOpen) return null;
 
   return (
-    <dialog open className="modal modal-open z-[1000]">
-      <div className="modal-box max-w-2xl">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-base-100 h-[75vh] w-[80vw] dark:bg-gray-900 rounded-2xl shadow-2xl overflow-auto border border-gray-700">
         {/* Header */}
-        <div className="flex justify-between items-center border-b pb-2 mb-3">
-          <h3 className="font-bold text-lg">Payments</h3>
-          <button onClick={onClose} className="btn btn-sm btn-ghost">
-            ✕
-          </button>
+        <div className="flex items-center justify-between p-5 border-b border-gray-700">
+          <h2 className="text-lg font-bold">
+            Transactions for{" "}
+            <span className="text-primary">{patient?.patientName}</span>
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setOpenNewModal(true)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/80 transition text-sm"
+            >
+              <Plus size={16} /> New Transaction
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition"
+            >
+              <X size={22} />
+            </button>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div role="tablist" className="tabs tabs-boxed mb-4">
-          <button
-            role="tab"
-            className={`tab ${activeTab === "full" ? "tab-active" : ""}`}
-            onClick={() => setActiveTab("full")}
-          >
-            Full Payments
-          </button>
-          <button
-            role="tab"
-            className={`tab ${
-              activeTab === "installments" ? "tab-active" : ""
-            }`}
-            onClick={() => setActiveTab("installments")}
-          >
-            Installments
-          </button>
+        {/* Summary */}
+        <div className="grid grid-cols-3 gap-4 p-5 border-b border-gray-700 bg-base-200 dark:bg-gray-800 text-center rounded-t-lg">
+          <div>
+            <p className="text-xs text-gray-400 uppercase">Total Paid</p>
+            <p className="text-xl font-bold text-success">
+              ₱{summary.totalPaid.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 uppercase">Remaining</p>
+            <p className="text-xl font-bold text-warning">
+              ₱{summary.totalRemaining.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 uppercase">Transactions</p>
+            <p className="text-xl font-bold text-info">{transactions.length}</p>
+          </div>
         </div>
 
-        {/* Tab Content */}
-        <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
-          {activeTab === "full"
-            ? renderList(transactions)
-            : renderList(installments)}
-        </div>
+        {/* Transactions List */}
+        <div className="p-5 max-h-[40vh] overflow-y-auto">
+          {loading ? (
+            <p className="text-center text-gray-400 py-8 animate-pulse">
+              Loading transactions...
+            </p>
+          ) : transactions.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">
+              No transactions found.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {transactions.map((t) => (
+                <li
+                  key={t.$id}
+                  className="bg-base-200 dark:bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-primary transition"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold text-base">
+                        {t.serviceName || "Unnamed Service"}
+                      </h3>
+                      <p className="text-xs text-gray-400">
+                        {t.paymentType || "Transaction"} —{" "}
+                        {dayjs(t.dateTransact || t.$createdAt).format(
+                          "MMM D, YYYY"
+                        )}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg text-primary">
+                        ₱{Number(t.paid || 0).toLocaleString()}
+                      </p>
+                      {t.remaining > 0 && (
+                        <p className="text-xs text-gray-400">
+                          Remaining: ₱{Number(t.remaining).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-        {/* Add Payment */}
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="Amount"
-            className="input input-bordered w-full"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <button
-            onClick={handleAdd}
-            className={`btn btn-primary ${adding ? "loading" : ""}`}
-            disabled={adding || loading}
-          >
-            Add
-          </button>
+                  {/* Installment View Button */}
+                  {t.paymentType === "installment" && (
+                    <div className="mt-2 text-right">
+                      <button
+                        onClick={() => setSelectedInstallment(t)}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        View Installments
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="modal-action mt-4">
-          <button onClick={onClose} className="btn btn-neutral">
+        <div className="flex justify-end p-4 border-t border-gray-700">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"
+          >
             Close
           </button>
         </div>
       </div>
 
-      <form method="dialog" className="modal-backdrop">
-        <button onClick={onClose}>close</button>
-      </form>
-    </dialog>
+      {/* New Transaction Modal */}
+      {openNewModal && (
+        <NewTransactionModal
+          patient={patient}
+          onClose={() => setOpenNewModal(false)}
+          onSaved={fetchTransactions}
+        />
+      )}
+
+      {selectedInstallment && (
+        <InstallmentsModal
+          transaction={selectedInstallment}
+          onClose={() => setSelectedInstallment(null)}
+        />
+      )}
+    </div>
   );
 }

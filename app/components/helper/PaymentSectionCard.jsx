@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import PaymentsModal from "./PaymentModal"; // Create this next!
+import PaymentModal from "./PaymentModal"; // make sure filename matches
 
-export default function PaymentSectionCard({ patientId }) {
+export default function PaymentSectionCard({ patient }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -19,9 +19,11 @@ export default function PaymentSectionCard({ patientId }) {
       </div>
 
       {/* Modal */}
-      {open && (
-        <PaymentsModal patientId={patientId} onClose={() => setOpen(false)} />
-      )}
+      <PaymentModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        patient={patient}
+      />
     </>
   );
 }

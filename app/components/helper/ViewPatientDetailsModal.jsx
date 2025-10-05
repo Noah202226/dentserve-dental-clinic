@@ -119,7 +119,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
                     }
                   /> */}
 
-                  <PaymentSectionCard patientId={patient.$id} />
+                  <PaymentSectionCard patient={patient} />
                 </>
               )}
             </div>
