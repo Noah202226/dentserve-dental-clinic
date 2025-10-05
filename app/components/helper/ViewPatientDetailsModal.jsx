@@ -5,6 +5,9 @@ import SubSectionModal from "./SubSectionModal";
 import { useNotesStore } from "../../stores/useNotesStore";
 import { useMedicalHistoryStore } from "../../stores/useMedicalHistoryStore";
 import { useTreatmentPlanStore } from "../../stores/useTreatmentPlanStore";
+import { usePaymentStore } from "@/app/stores/usePaymentStore";
+import PaymentModal from "./PaymentModal";
+import PaymentSectionCard from "./PaymentSectionCard";
 
 export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   const [activeSection, setActiveSection] = useState(null);
@@ -12,6 +15,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   const notes = useNotesStore();
   const medHistory = useMedicalHistoryStore();
   const treatment = useTreatmentPlanStore();
+  const paymentStore = usePaymentStore();
 
   useEffect(() => {
     if (patient?.$id) {
@@ -22,6 +26,9 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   }, [patient?.$id]);
 
   if (!patient || !isOpen) return null;
+
+  const sectionsLoading =
+    notes.loading || medHistory.loading || treatment.loading;
 
   return (
     <>
@@ -53,46 +60,68 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
 
             {/* Sections */}
             <div className="mt-6 border-t pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <SectionCard
-                title="Medical History"
-                count={medHistory.items.length}
-                onClick={() =>
-                  setActiveSection({
-                    title: "Medical History",
-                    collectionId: "medicalhistory",
-                  })
-                }
-              />
-              <SectionCard
-                title="Dental Notes"
-                count={notes.items.length}
-                onClick={() =>
-                  setActiveSection({
-                    title: "Dental Notes",
-                    collectionId: "notes",
-                  })
-                }
-              />
-              <SectionCard
-                title="Treatment Plan"
-                count={treatment.items.length}
-                onClick={() =>
-                  setActiveSection({
-                    title: "Treatment Plan",
-                    collectionId: "treatmentplans",
-                  })
-                }
-              />
-              {/* <SectionCard
-                title="Dental Chart"
-                count={dental.items.length}
-                onClick={() =>
-                  setActiveSection({
-                    title: "Dental Chart",
-                    collectionId: "dentalcharts",
-                  })
-                }
-              /> */}
+              {sectionsLoading ? (
+                // 🔹 Show skeleton placeholders while any section is loading
+                [...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="p-4 bg-base-200 rounded-xl animate-pulse h-20"
+                  >
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <SectionCard
+                    title="Medical History"
+                    count={medHistory.items.length}
+                    onClick={() =>
+                      setActiveSection({
+                        title: "Medical History",
+                        collectionId: "medicalhistory",
+                      })
+                    }
+                  />
+                  <SectionCard
+                    title="Dental Notes"
+                    count={notes.items.length}
+                    onClick={() =>
+                      setActiveSection({
+                        title: "Dental Notes",
+                        collectionId: "notes",
+                      })
+                    }
+                  />
+
+                  <SectionCard
+                    title="Treatment Plan"
+                    count={treatment.items.length}
+                    onClick={() =>
+                      setActiveSection({
+                        title: "Treatment Plan",
+                        collectionId: "treatmentplans",
+                      })
+                    }
+                  />
+
+                  {/* <SectionCard
+                    title="Payments"
+                    count={
+                      paymentStore.fullPayments.length +
+                      paymentStore.installments.length
+                    }
+                    onClick={() =>
+                      setActiveSection({
+                        title: "Payments",
+                        collectionId: "payments",
+                      })
+                    }
+                  /> */}
+
+                  <PaymentSectionCard patientId={patient.$id} />
+                </>
+              )}
             </div>
           </div>
 
@@ -115,6 +144,12 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
             onClose={() => setActiveSection(null)}
           />
         </div>
+      )}
+      {activeSection?.collectionId === "payments" && (
+        <PaymentModal
+          patientId={patient.$id}
+          onClose={() => setActiveSection(null)}
+        />
       )}
     </>
   );
