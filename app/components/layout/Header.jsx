@@ -119,13 +119,13 @@ export default function Header() {
           )}
 
           {/* Mobile Menu Button */}
-          {/* <button
+          <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden btn"
             aria-label="Toggle menu"
           >
             {menuOpen ? "✖" : "☰"}
-          </button> */}
+          </button>
         </div>
       </div>
 
@@ -136,7 +136,7 @@ export default function Header() {
           animate={{ opacity: 1, y: 0 }}
           className="md:hidden  px-6 py-4 space-y-4"
         >
-          <Link
+          {/* <Link
             href="#features"
             className="block hover:text-primary text-base-content transition-colors duration-500"
             onClick={() => setMenuOpen(false)}
@@ -156,7 +156,7 @@ export default function Header() {
             onClick={() => setMenuOpen(false)}
           >
             FAQ
-          </Link>
+          </Link> */}
 
           {/* Auth state on mobile */}
           {current ? (
