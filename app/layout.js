@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-base-100 text-base-content transition-colors duration-300">
+      <body className="bg-base-100 text-base-content transition-colors duration-300 ">
         {/* ✅ Show header + footer only if no user */}
         {!current && <Header />}
         <main className="min-h-screen">{children}</main>
