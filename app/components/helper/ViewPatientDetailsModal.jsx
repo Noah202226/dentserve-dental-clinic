@@ -17,6 +17,21 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   const treatment = useTreatmentPlanStore();
   const paymentStore = usePaymentStore();
 
+  function calculateAge(birthdate) {
+    if (!birthdate) return null;
+    const birth = new Date(birthdate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
+  }
+
   useEffect(() => {
     if (patient?.$id) {
       notes.fetchItems(patient.$id);
@@ -37,7 +52,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
           {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-mint-500 text-white px-4 sm:px-6 py-4 sticky top-0 z-10 rounded-t-2xl">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold truncate">
-              {patient.patientName}
+              {patient.patientName} -{" "}
             </h2>
             <p className="mt-1 text-sm opacity-90">
               Payment Balance:{" "}
@@ -51,14 +66,34 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
           <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 bg-mint-50">
             {/* Patient Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {/* <Detail label="Email" value={patient.email} /> */}
-              <Detail label="Gender" value={patient.gender} />
               <Detail label="Address" value={patient.address} />
+              <Detail label="Gender" value={patient.gender} />
+              {/* <Detail label="Email" value={patient.email} /> */}
               <Detail
                 label="Birthdate"
                 value={new Date(patient.birthdate).toLocaleDateString()}
               />
+              {/* Birthdate + Age */}
+              <Detail
+                label="Birthdate"
+                value={
+                  <>
+                    <span className="text-gray-500 ml-2">
+                      ({calculateAge(patient.birthdate)} years old)
+                    </span>
+                  </>
+                }
+              />
               <Detail label="Contact Number" value={patient.contact} />
+              <Detail label="Note" value={patient.note} />
+              <Detail
+                label="Emergency Contact"
+                value={patient.emergencyToContact}
+              />
+              <Detail
+                label="Emergency Contact Number"
+                value={patient.emergencyToContactNumber}
+              />
             </div>
 
             {/* Sections */}
