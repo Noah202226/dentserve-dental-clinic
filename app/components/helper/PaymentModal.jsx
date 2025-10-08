@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { databases, ID } from "../../lib/appwrite";
 import { Query } from "appwrite";
-import { X, Plus, Trash2, Loader2 } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import dayjs from "dayjs";
 import NewTransactionModal from "./NewTransactionModal";
 import InstallmentsModal from "./InstallmentsModal";
@@ -16,11 +16,9 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState({ totalPaid: 0, totalRemaining: 0 });
   const [openNewModal, setOpenNewModal] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-
   const [selectedInstallment, setSelectedInstallment] = useState(null);
 
-  // 🔹 Fetch transactions
+  // Fetch transactions
   const fetchTransactions = async () => {
     if (!patient?.$id) return;
     try {
@@ -47,52 +45,33 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
     }
   };
 
-  // 🔹 Delete a transaction
-  const handleDelete = async (id) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this transaction?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      setDeletingId(id);
-      await databases.deleteDocument(DATABASE_ID, COLLECTION_TRANSACTIONS, id);
-      setTransactions((prev) => prev.filter((t) => t.$id !== id));
-    } catch (err) {
-      console.error("Error deleting transaction:", err);
-      alert("Failed to delete transaction.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   useEffect(() => {
-    if (isOpen && patient?.$id) {
-      fetchTransactions();
-    }
+    if (isOpen && patient?.$id) fetchTransactions();
   }, [isOpen, patient]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-base-100 h-[75vh] w-[80vw] dark:bg-gray-900 rounded-2xl shadow-2xl overflow-auto border border-gray-700">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3">
+      <div className="bg-white w-full sm:w-[85vw] md:w-[70vw] lg:w-[60vw] max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-mint-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-700">
-          <h2 className="text-lg font-bold">
+        <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-green-600 to-mint-500 text-white">
+          <h2 className="text-lg font-semibold truncate">
             Transactions for{" "}
-            <span className="text-primary">{patient?.patientName}</span>
+            <span className="font-bold text-yellow-200">
+              {patient?.patientName}
+            </span>
           </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setOpenNewModal(true)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/80 transition text-sm"
+              className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition text-sm"
             >
               <Plus size={16} /> New Transaction
             </button>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition"
+              className="text-white/80 hover:text-white transition"
             >
               <X size={22} />
             </button>
@@ -100,33 +79,35 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
         </div>
 
         {/* Summary */}
-        <div className="grid grid-cols-3 gap-4 p-5 border-b border-gray-700 bg-base-200 dark:bg-gray-800 text-center rounded-t-lg">
+        <div className="grid grid-cols-3 gap-4 p-5 bg-mint-50 border-b border-mint-200 text-center">
           <div>
-            <p className="text-xs text-gray-400 uppercase">Total Paid</p>
-            <p className="text-xl font-bold text-success">
+            <p className="text-xs text-green-700 uppercase">Total Paid</p>
+            <p className="text-xl font-bold text-green-600">
               ₱{summary.totalPaid.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase">Remaining</p>
-            <p className="text-xl font-bold text-warning">
+            <p className="text-xs text-green-700 uppercase">Remaining</p>
+            <p className="text-xl font-bold text-yellow-600">
               ₱{summary.totalRemaining.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase">Transactions</p>
-            <p className="text-xl font-bold text-info">{transactions.length}</p>
+            <p className="text-xs text-green-700 uppercase">Transactions</p>
+            <p className="text-xl font-bold text-green-500">
+              {transactions.length}
+            </p>
           </div>
         </div>
 
         {/* Transactions List */}
-        <div className="p-5 max-h-[40vh] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-5 bg-white">
           {loading ? (
-            <p className="text-center text-gray-400 py-8 animate-pulse">
+            <p className="text-center text-green-600 py-8 animate-pulse">
               Loading transactions...
             </p>
           ) : transactions.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center text-gray-400 py-8">
               No transactions found.
             </p>
           ) : (
@@ -134,14 +115,14 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
               {transactions.map((t) => (
                 <li
                   key={t.$id}
-                  className="bg-base-200 dark:bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-primary transition"
+                  className="p-4 bg-mint-50 border border-mint-200 rounded-xl hover:border-green-400 hover:bg-mint-100 transition"
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-semibold text-base">
+                      <h3 className="font-semibold text-green-700">
                         {t.serviceName || "Unnamed Service"}
                       </h3>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-green-600">
                         {t.paymentType || "Transaction"} —{" "}
                         {dayjs(t.dateTransact || t.$createdAt).format(
                           "MMM D, YYYY"
@@ -149,15 +130,15 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-lg text-primary">
+                      <p className="font-bold text-lg text-green-600">
                         ₱{Number(t.paid || 0).toLocaleString()}
                       </p>
                       {t.remaining > 0 ? (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-green-700">
                           Remaining: ₱{Number(t.remaining).toLocaleString()}
                         </p>
                       ) : (
-                        <p className="text-xs text-green-400">
+                        <p className="text-xs text-green-500">
                           (PAID) Remaining: ₱
                           {Number(t.remaining).toLocaleString()}
                         </p>
@@ -170,7 +151,7 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
                     <div className="mt-2 text-right">
                       <button
                         onClick={() => setSelectedInstallment(t)}
-                        className="text-sm text-primary hover:underline"
+                        className="text-sm text-green-600 hover:underline"
                       >
                         View Installments
                       </button>
@@ -183,10 +164,10 @@ export default function PaymentModal({ isOpen, onClose, patient }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end p-4 border-t border-gray-700">
+        <div className="border-t border-mint-200 p-4 bg-mint-50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"
+            className="px-5 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition"
           >
             Close
           </button>

@@ -89,6 +89,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
         ID.unique(),
         {
           patientId: patient.$id,
+          patientName: patient.patientName,
           serviceId: form.serviceId,
           serviceName: form.serviceName,
           totalAmount: Number(form.servicePrice),
@@ -99,23 +100,34 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
         }
       );
 
-      // 🔹 2️⃣ If installment, add initial payment record to `installments`
+      // 🔹 2️⃣ If installment, add initial payment record
       if (form.paymentType === "installment" && Number(form.initialPay) > 0) {
         await databases.createDocument(
           DATABASE_ID,
           COLLECTION_INSTALLMENTS,
           ID.unique(),
           {
-            transactionId: transactionRes.$id, // 🔗 link to parent
+            transactionId: transactionRes.$id,
             amount: Number(form.initialPay),
             dateTransact: new Date().toISOString(),
             patientId: patient.$id,
+            patientName: patient.patientName,
             serviceName: form.serviceName,
             remaining: Number(form.servicePrice) - Number(form.initialPay),
             note: "Initial payment",
           }
         );
       }
+
+      // ✅ Reset form after save
+      setForm({
+        serviceId: "",
+        serviceName: "",
+        servicePrice: 0,
+        totalAmount: "",
+        paymentType: "",
+        initialPay: "",
+      });
 
       onSaved();
       onClose();
@@ -128,11 +140,14 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-sm flex justify-center items-center">
-      <div className="bg-base-100 dark:bg-gray-900 w-full max-w-md p-8 rounded-2xl h-full shadow-2xl border border-gray-700 overflow-auto">
+      <div className="dark:bg-gray-900 w-full max-w-md p-8 rounded-2xl h-full shadow-2xl border border-gray-700 overflow-auto">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-lg font-bold text-primary">New Transaction</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <h2 className="text-lg font-bold text-green-500">New Transaction</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-green-400"
+          >
             <X size={22} />
           </button>
         </div>
@@ -141,12 +156,14 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
         <form onSubmit={handleSubmit} className="p-5 space-y-4 h-full">
           {/* Service selection */}
           <div>
-            <label className="block text-sm mb-1 font-medium">Service</label>
+            <label className="block text-sm mb-1 font-medium text-green-400">
+              Service
+            </label>
             <select
               name="serviceId"
               value={form.serviceId}
               onChange={handleServiceChange}
-              className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full"
+              className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full focus:border-green-400"
               required
             >
               <option value="">Select service</option>
@@ -162,7 +179,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
           {form.servicePrice > 0 && (
             <div className="text-sm text-gray-400">
               Service Price:{" "}
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-green-300">
                 ₱{Number(form.servicePrice).toLocaleString()}
               </span>
             </div>
@@ -170,14 +187,14 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
 
           {/* Payment Type */}
           <div>
-            <label className="block text-sm mb-1 font-medium">
+            <label className="block text-sm mb-1 font-medium text-green-400">
               Payment Type
             </label>
             <select
               name="paymentType"
               value={form.paymentType}
               onChange={handleChange}
-              className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full"
+              className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full focus:border-green-400"
               required
             >
               <option value="">Select type</option>
@@ -190,7 +207,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
           {form.paymentType === "installment" && (
             <>
               <div>
-                <label className="block text-sm mb-1 font-medium">
+                <label className="block text-sm mb-1 font-medium text-green-400">
                   Initial Payment (₱)
                 </label>
                 <input
@@ -199,14 +216,14 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
                   value={form.initialPay || ""}
                   onChange={handleChange}
                   placeholder="Enter initial amount"
-                  className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full"
+                  className="border border-gray-600 bg-transparent rounded-lg px-3 py-2 w-full focus:border-green-400"
                   required
                 />
               </div>
 
               <div className="text-sm text-gray-400 mt-1">
                 Remaining Balance:{" "}
-                <span className="font-semibold text-warning">
+                <span className="font-semibold text-mint-400">
                   ₱{remainingBalance.toLocaleString()}
                 </span>
               </div>
@@ -225,7 +242,7 @@ export default function NewTransactionModal({ patient, onClose, onSaved }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg text-white"
+              className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white transition"
             >
               {loading ? "Saving..." : "Save Transaction"}
             </button>

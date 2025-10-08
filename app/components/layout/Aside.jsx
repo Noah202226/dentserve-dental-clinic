@@ -1,5 +1,7 @@
 "use client";
 
+import { usePersonalizationStore } from "@/app/stores/usePersonalizationStore";
+import { useEffect } from "react";
 import {
   FiHome,
   FiBriefcase,
@@ -12,13 +14,20 @@ import {
 } from "react-icons/fi";
 
 export default function Sidebar() {
+  const { personalization, fetchPersonalization } = usePersonalizationStore();
+
+  useEffect(() => {
+    fetchPersonalization();
+  }, []);
   return (
     <div className="drawer-side">
       <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
       <aside className="w-64 bg-base-200 h-full flex flex-col">
         {/* Logo / Brand */}
         <div className="p-4 border-b border-base-300">
-          <h2 className="text-2xl font-bold text-primary">DentServe</h2>
+          <h2 className="text-2xl font-bold text-primary">
+            {personalization?.businessName} dsds
+          </h2>
         </div>
 
         {/* Navigation */}

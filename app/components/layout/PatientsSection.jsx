@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiUserPlus, FiSearch } from "react-icons/fi";
+import { FiUserPlus, FiSearch, FiEye, FiTrash2 } from "react-icons/fi";
 import AddPatientModal from "../helper/AddPatientModal";
 import ViewPatientDetailsModal from "../helper/ViewPatientDetailsModal";
 import { usePatientStore } from "@/app/stores/usePatientStore";
@@ -17,9 +17,9 @@ export default function PatientsSection() {
 
   const { patients, fetchPatients, addPatient, deletePatient } =
     usePatientStore();
-
-  const [loading, setLoading] = useState(false); // ✅ loading state for add
-  const [deleteLoading, setDeleteLoading] = useState(false); // optional for delete
+  const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchPatients();
@@ -60,15 +60,24 @@ export default function PatientsSection() {
     }
   };
 
+  const filteredPatients = patients.filter((p) =>
+    p.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">👥 Patients</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            👥 Patients
+          </h1>
+          <p className="text-sm text-white">Manage and view patient records</p>
+        </div>
         <button
           onClick={() => setIsOpen(true)}
-          className={`btn btn-primary flex items-center gap-2 ${
-            loading ? "opacity-70 cursor-not-allowed" : ""
+          className={`btn bg-green-600 hover:bg-[#5A54E0] text-white border-none flex items-center gap-2 rounded-xl shadow transition-all ${
+            loading ? "opacity-70 cursor-not-allowed" : "hover:scale-105"
           }`}
           disabled={loading}
         >
@@ -87,99 +96,117 @@ export default function PatientsSection() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="stat bg-base-200 rounded-xl p-4 shadow">
-          <div className="stat-title">Total Patients</div>
+        <div className="stat bg-green-400 backdrop-blur rounded-2xl p-4 shadow-md border border-[#B3E6C2]">
+          <div className="stat-title text-gray-600">Total Patients</div>
           <div className="stat-value text-primary">{patients.length}</div>
         </div>
-        <div className="stat bg-base-200 rounded-xl p-4 shadow">
-          <div className="stat-title">Active Patients</div>
-          <div className="stat-value text-secondary">
+        <div className="stat bg-green-400 backdrop-blur rounded-2xl p-4 shadow-md border border-[#B3E6C2]">
+          <div className="stat-title text-gray-600">Active Patients</div>
+          <div className="stat-value text-green-600">
             {patients.filter((p) => p.balance === 0).length}
           </div>
         </div>
-        <div className="stat bg-base-200 rounded-xl p-4 shadow">
-          <div className="stat-title">With Balance</div>
+        <div className="stat bg-green-400 backdrop-blur rounded-2xl p-4 shadow-md border border-[#B3E6C2]">
+          <div className="stat-title text-gray-600">With Balance</div>
           <div className="stat-value text-error">
             {patients.filter((p) => p.balance > 0).length}
           </div>
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search + Table */}
       <div className="flex flex-col h-full">
-        <label className="input input-bordered flex items-center gap-2 w-full md:w-1/3">
-          <FiSearch />
+        <label className="input input-bordered flex items-center gap-2 w-full md:w-1/3 rounded-xl shadow-sm border border-[#B3E6C2] bg-[#E9FFF0]">
+          <FiSearch className="text-gray-500" />
           <input
             type="text"
-            className="grow"
+            className="grow bg-transparent focus:outline-none"
             placeholder="Search patients..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </label>
 
-        {/* Table Wrapper */}
-        <div className="flex-1 overflow-hidden">
+        {/* Table */}
+        <div className="flex-1 overflow-hidden mt-4">
           <div className="h-75 overflow-y-auto pr-2">
             {/* Desktop Table */}
             <div className="hidden md:block">
-              <table className="table table-zebra w-full">
-                <thead className="sticky top-0 bg-base-200 z-10">
-                  <tr>
+              <table className="table w-full rounded-xl overflow-hidden border border-[#B3E6C2]">
+                <thead className="sticky top-0 bg-green-500 text-gray-600 z-10">
+                  <tr className="text-sm text-white">
                     <th>Name</th>
                     <th>Address</th>
                     <th>Contact</th>
-                    <th>Actions</th>
+                    <th className="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {patients.map((patient) => (
-                    <tr key={patient.$id}>
-                      <td>{patient.patientName}</td>
-                      <td>{patient.address}</td>
-                      <td>{patient.contact}</td>
-                      <td className="flex gap-2">
-                        <button
-                          className="btn btn-info btn-sm"
-                          onClick={() => handleView(patient)}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="btn btn-error btn-sm"
-                          onClick={() => handleDeleteConfirm(patient)}
-                        >
-                          Delete
-                        </button>
+                  {filteredPatients.length > 0 ? (
+                    filteredPatients.map((patient) => (
+                      <tr
+                        key={patient.$id}
+                        className="hover:bg-[#D9FFE5]/70 transition-all"
+                      >
+                        <td className="font-medium text-white">
+                          {patient.patientName}
+                        </td>
+                        <td className="text-white">{patient.address}</td>
+                        <td className="text-white">{patient.contact}</td>
+                        <td className="flex gap-2 justify-center">
+                          <button
+                            className="btn btn-sm bg-green-500 hover:bg-[#2CA6E0] text-white border-none rounded-lg flex items-center gap-1"
+                            onClick={() => handleView(patient)}
+                          >
+                            <FiEye /> View
+                          </button>
+                          <button
+                            className="btn btn-sm bg-[#F87171] hover:bg-[#EF4444] text-white border-none rounded-lg flex items-center gap-1"
+                            onClick={() => handleDeleteConfirm(patient)}
+                          >
+                            <FiTrash2 /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="text-center text-gray-500 py-6"
+                      >
+                        No patients found
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile Card Layout */}
             <div className="grid gap-4 md:hidden">
-              {patients.map((patient) => (
+              {filteredPatients.map((patient) => (
                 <div
                   key={patient.$id}
-                  className="card bg-base-200 shadow-md p-4 rounded-lg"
+                  className="card bg-[#C9FDD7]/70 backdrop-blur shadow-md p-4 rounded-2xl border border-[#B3E6C2] hover:shadow-lg transition-all"
                 >
-                  <h2 className="font-semibold text-lg">
+                  <h2 className="font-semibold text-lg text-primary">
                     {patient.patientName}
                   </h2>
-                  <p className="text-sm text-gray-400">{patient.address}</p>
+                  <p className="text-sm text-gray-600">{patient.address}</p>
                   <p className="text-sm">{patient.contact}</p>
                   <div className="flex gap-2 mt-3">
                     <button
                       className="btn btn-info btn-sm flex-1"
                       onClick={() => handleView(patient)}
                     >
-                      View
+                      <FiEye /> View
                     </button>
                     <button
                       className="btn btn-error btn-sm flex-1"
                       onClick={() => handleDeleteConfirm(patient)}
                     >
-                      Delete
+                      <FiTrash2 /> Delete
                     </button>
                   </div>
                 </div>
@@ -189,34 +216,32 @@ export default function PatientsSection() {
         </div>
       </div>
 
-      {/* Add Patient Modal */}
+      {/* Modals */}
       <AddPatientModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         onSave={handleSavePatient}
-        loading={loading} // ✅ pass to modal
+        loading={loading}
       />
 
-      {/* View Patient Modal */}
       <ViewPatientDetailsModal
         patient={selectedPatient}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
 
-      {/* Delete Confirmation Modal */}
       {confirmModal.isOpen && (
         <dialog open className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg text-error">Confirm Delete</h3>
-            <p className="py-3">
+          <div className="modal-box rounded-2xl bg-green-600">
+            <h3 className="font-bold text-xl text-white">⚠ Confirm Delete</h3>
+            <p className="py-3 text-lg text-gray-300">
               Are you sure you want to delete{" "}
               <strong>{confirmModal.patient?.patientName}</strong>? <br />
               This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3 mt-4">
               <button
-                className="btn btn-outline"
+                className="btn btn-outline border-[#B3E6C2] text-gray-600 rounded-lg"
                 onClick={() =>
                   setConfirmModal({ isOpen: false, patient: null })
                 }
@@ -225,7 +250,7 @@ export default function PatientsSection() {
                 Cancel
               </button>
               <button
-                className="btn btn-error"
+                className="btn btn-error rounded-lg text-white"
                 onClick={handleDelete}
                 disabled={deleteLoading}
               >

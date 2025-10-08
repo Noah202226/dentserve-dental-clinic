@@ -18,27 +18,27 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
   };
 
   return (
-    <div className="card w-full max-w-md shadow-xl bg-base-100">
-      <form onSubmit={onSubmit} className="card-body space-y-6">
+    <div className="card w-full max-w-md bg-gradient-to-b from-white to-green-50 border border-green-100 shadow-2xl rounded-2xl">
+      <form onSubmit={onSubmit} className="card-body space-y-6 p-8">
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-base-content text-center">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-green-700 text-center">
           {submitType === "Sign Up" ? "Create an Account" : "Welcome Back"}
         </h2>
 
         {/* Email */}
         <div className="form-control">
           <label className="label">
-            <span className="label-text text-base-content">Email</span>
+            <span className="label-text text-green-800 font-medium">Email</span>
           </label>
-          <label className="input input-bordered flex items-center gap-2 w-full">
-            <Mail className="w-5 h-5 opacity-70 text-base-content" />
+          <label className="input input-bordered flex items-center gap-2 w-full border-green-300 focus-within:border-green-500 rounded-xl bg-white shadow-sm transition-all">
+            <Mail className="w-5 h-5 text-green-600 opacity-80" />
             <input
               type="email"
               name="email"
               placeholder="Enter your email"
-              defaultValue={"noaligpitan@gmail.com"} // test only
+              defaultValue={"testuser@gmail.com"} // test only
               required
-              className="grow text-base-content placeholder:text-base-content/60"
+              className="grow text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none"
             />
           </label>
         </div>
@@ -46,17 +46,19 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
         {/* Password */}
         <div className="form-control">
           <label className="label">
-            <span className="label-text text-base-content">Password</span>
+            <span className="label-text text-green-800 font-medium">
+              Password
+            </span>
           </label>
-          <label className="input input-bordered flex items-center gap-2 w-full">
-            <Lock className="w-5 h-5 opacity-70 text-base-content" />
+          <label className="input input-bordered flex items-center gap-2 w-full border-green-300 focus-within:border-green-500 rounded-xl bg-white shadow-sm transition-all">
+            <Lock className="w-5 h-5 text-green-600 opacity-80" />
             <input
               type="password"
               name="password"
               placeholder="Enter your password"
-              defaultValue={"password123"} // test only
+              defaultValue={"testpassword"} // test only
               required
-              className="grow text-base-content placeholder:text-base-content/60"
+              className="grow text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none"
             />
           </label>
         </div>
@@ -65,7 +67,7 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary w-full flex justify-center items-center"
+          className="btn w-full bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-md transition-all duration-300 ease-in-out"
         >
           {loading ? (
             <>
@@ -79,14 +81,14 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
 
         {/* Toggle */}
         {onToggle && (
-          <p className="text-center text-sm text-base-content">
+          <p className="text-center text-sm text-gray-600">
             {submitType === "Sign Up" ? (
               <>
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={onToggle}
-                  className="link link-primary"
+                  className="text-green-700 font-semibold hover:underline"
                   disabled={loading}
                 >
                   Log In
@@ -98,7 +100,7 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
                 <button
                   type="button"
                   onClick={onToggle}
-                  className="link link-primary"
+                  className="text-green-700 font-semibold hover:underline"
                   disabled={loading}
                 >
                   Sign Up

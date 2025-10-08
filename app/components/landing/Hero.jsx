@@ -1,115 +1,129 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
+import AuthForm from "../AuthForm"; // <-- adjust the import path as needed
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/app/stores/authStore";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
+  const { login, register, getCurrentUser, current, loading } = useAuthStore(
+    (state) => state
+  );
+  const [isSignUp, setIsSignUp] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, [getCurrentUser]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const user = await login(form.get("email"), form.get("password"));
+    if (user) router.push("/"); // ✅ safe navigation
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const user = await register(form.get("email"), form.get("password"));
+    if (user) router.push("/"); // ✅ safe navigation
+  };
+
   return (
-    <section className="relative min-h-screen flex flex-col md:flex-row items-center justify-between bg-gradient-to-b from-green-50 to-white px-8 md:px-16 py-12 overflow-hidden">
-      {/* Left Content */}
-      <div className="flex-1 text-center md:text-left z-10">
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Image
-            src="/DentServeLogo.png" // <-- Replace with your logo file path
-            alt="DentServe Dental Clinic Logo"
-            width={220}
-            height={220}
-            className="mx-auto md:mx-0 drop-shadow-md"
-          />
-        </motion.div>
-
-        {/* Clinic Name and Tagline */}
-        <motion.h1
-          className="mt-6 text-5xl md:text-6xl font-extrabold text-gray-800"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          Your Smile, <span className="text-green-600">Our Priority</span>
-        </motion.h1>
-
-        <motion.p
-          className="mt-4 text-lg md:text-xl text-gray-600 max-w-xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          General Dentistry • Cosmetic Dentistry • Orthodontics • Oral Surgery
-        </motion.p>
-
-        {/* Call to Action Buttons */}
-        <motion.div
-          className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-        >
-          <Link
-            href="#appointments"
-            className="btn bg-green-600 hover:bg-green-700 text-white border-none rounded-full px-8"
-          >
-            Book Appointment
-          </Link>
-          <Link
-            href="#about"
-            className="btn btn-outline border-green-600 text-green-600 hover:bg-green-50 rounded-full px-8"
-          >
-            Learn More
-          </Link>
-        </motion.div>
-
-        {/* Clinic Info */}
-        <motion.div
-          className="mt-10 text-sm text-gray-500 leading-relaxed"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-        >
-          <p className="font-semibold text-gray-700">
-            📍 Unit 108 LSS Building, General Tirona Highway, Habay 2, Bacoor,
-            Cavite
-          </p>
-          <p>🕘 Monday – Saturday | 9:00 AM – 6:00 PM</p>
-          <p>📞 Globe: 0956 535 6303 | Smart: 0918 646 0764</p>
-          <p>✉️ dentserve.ph@gmail.com</p>
-        </motion.div>
+    <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-50 to-white overflow-hidden">
+      {/* Floating Top Bar */}
+      <div className="w-full bg-green-600 text-white py-3 px-6 text-center text-sm md:text-base font-medium flex flex-wrap justify-center gap-x-4">
+        <span>🦷 General Dentistry</span>
+        <span>•</span>
+        <span>Cosmetic Dentistry</span>
+        <span>•</span>
+        <span>Orthodontics</span>
+        <span>•</span>
+        <span>Oral Surgery</span>
       </div>
 
-      {/* Right Side – QR + Clinic Image */}
-      <motion.div
-        className="flex-1 flex flex-col items-center md:items-end justify-center mt-12 md:mt-0 z-10"
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.6, duration: 0.8 }}
-      >
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-green-100">
-          <Image
-            src="/dentserve-qr.png" // <-- Add your QR image here
-            alt="DentServe QR Code"
-            width={180}
-            height={180}
-          />
-          <p className="mt-3 text-sm text-gray-600 text-center font-medium">
-            Scan to locate us!
-          </p>
+      {/* Main Content */}
+      <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl px-6 md:px-12 py-16 z-10">
+        {/* Left Section */}
+        <div className="flex-1 text-center md:text-left">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-6"
+          >
+            <Image
+              src="/dentserve-logo.png" // <-- replace with your actual image
+              alt="DentServe Dental Clinic Logo"
+              width={150}
+              height={150}
+              className="mx-auto md:mx-0 drop-shadow-md"
+            />
+          </motion.div>
+
+          {/* Clinic Heading */}
+          <motion.h1
+            className="text-5xl md:text-6xl font-extrabold text-gray-800"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Welcome to{" "}
+            <span className="text-green-600">DentServe Dental Clinic</span>
+          </motion.h1>
+
+          {/* Subtext */}
+          <motion.p
+            className="mt-4 text-lg md:text-xl text-gray-600 max-w-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            Providing high-quality dental care in a comfortable and caring
+            environment. Let’s make your smile shine!
+          </motion.p>
+
+          {/* Clinic Info */}
+          <motion.div
+            className="mt-10 text-sm text-gray-600 leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <p className="font-semibold text-gray-700">
+              📍 Unit 108 LSS Building, General Tirona Highway, Habay 2, Bacoor,
+              Cavite
+            </p>
+            <p>🕘 Monday – Saturday | 9:00 AM – 6:00 PM</p>
+            <p>📞 Globe: 0956 535 6303 | Smart: 0918 646 0764</p>
+            <p>✉️ dentserve.ph@gmail.com</p>
+          </motion.div>
         </div>
 
-        <div className="mt-10">
-          <Image
-            src="/dentserve-clinic.jpg" // <-- Replace with your clinic photo
-            alt="DentServe Clinic Front"
-            width={380}
-            height={220}
-            className="rounded-2xl shadow-lg border border-gray-100"
-          />
+        {/* Right Section - Auth Form */}
+        <div className="px-4 sm:px-6 lg:px-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isSignUp ? "signup" : "login"}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="w-full max-w-md"
+            >
+              <AuthForm
+                handleSubmit={isSignUp ? handleRegister : handleLogin}
+                submitType={isSignUp ? "Sign Up" : "Log In"}
+                onToggle={() => setIsSignUp(!isSignUp)}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
 
       {/* Background Accent */}
       <div className="absolute inset-0 bg-gradient-to-tr from-yellow-100/10 via-green-100/10 to-transparent pointer-events-none"></div>

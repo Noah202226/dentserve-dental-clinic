@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNotesStore } from "../../stores/useNotesStore";
 import { useMedicalHistoryStore } from "../../stores/useMedicalHistoryStore";
 import { useTreatmentPlanStore } from "../../stores/useTreatmentPlanStore";
@@ -18,103 +19,141 @@ export default function SubSectionModal({
 }) {
   const useStore = sectionMap[collectionId];
   const { items, fetchItems, addItem, deleteItem, loading } = useStore();
-  const [form, setForm] = useState({ title: "", content: "" });
+
+  const [form, setForm] = useState({ name: "", description: "" });
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchItems(patientId);
-  }, [patientId]);
+  }, [patientId, fetchItems]);
 
   const handleAdd = async () => {
-    if (!form.title.trim() || !form.content.trim()) return;
+    if (!form.name.trim() || !form.description.trim()) {
+      return alert("Please fill in all fields");
+    }
+
     setAdding(true);
-    await addItem(patientId, form.title, form.content);
-    setForm({ title: "", content: "" });
-    setAdding(false);
+    try {
+      if (collectionId === "notes") {
+        await addItem({
+          name: form.name,
+          description: form.description,
+          patientId,
+        });
+      } else {
+        await addItem(patientId, form.name, form.description);
+      }
+      setForm({ name: "", description: "" });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save record");
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
     <dialog open className="modal modal-open z-[1000]">
-      <div className="modal-box max-w-lg">
-        {/* Header */}
-        <div className="flex justify-between items-center border-b pb-2 mb-3">
-          <h3 className="font-bold text-lg">{title}</h3>
-          <button onClick={onClose} className="btn btn-sm btn-ghost">
-            ✕
-          </button>
-        </div>
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="modal-box max-w-lg bg-[#FAF3E0] text-[#1E2B1F] shadow-xl border border-[#DCD1B4] rounded-2xl"
+        >
+          {/* Header */}
+          <div className="flex justify-between items-center border-b border-[#E6D8BA] pb-3 mb-3">
+            <h3 className="font-bold text-lg text-[#1E2B1F]">{title}</h3>
+            <button
+              onClick={onClose}
+              className="btn btn-sm bg-transparent text-[#1E2B1F] hover:bg-[#E6D8BA]"
+            >
+              ✕
+            </button>
+          </div>
 
-        {/* Content */}
-        <div className="max-h-60 overflow-y-auto space-y-2 mb-4">
-          {loading ? (
-            // 🔹 Loading skeleton while fetching
-            <>
-              {[...Array(3)].map((_, i) => (
+          {/* Content List */}
+          <div className="max-h-60 overflow-y-auto space-y-2 mb-4 pr-1">
+            {loading ? (
+              <>
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse bg-[#EDE6D2] h-16 rounded-lg"
+                  />
+                ))}
+              </>
+            ) : items.length > 0 ? (
+              items.map((i) => (
                 <div
-                  key={i}
-                  className="animate-pulse bg-base-200 h-16 rounded-md"
-                />
-              ))}
-            </>
-          ) : items.length > 0 ? (
-            items.map((i) => (
-              <div
-                key={i.$id}
-                className="bg-base-200 p-3 rounded-md flex justify-between items-start"
-              >
-                <div>
-                  <h4 className="font-semibold">{i.title}</h4>
-                  <p className="text-sm opacity-80">{i.content}</p>
-                </div>
-                <button
-                  className="btn btn-xs btn-error"
-                  onClick={() => deleteItem(i.$id)}
-                  disabled={adding || loading}
+                  key={i.$id}
+                  className="bg-[#EDE6D2] p-3 rounded-lg flex justify-between items-start shadow-sm"
                 >
-                  ✕
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm text-center py-4">
-              No records found.
-            </p>
-          )}
-        </div>
+                  <div>
+                    <h4 className="font-semibold text-[#1E2B1F]">
+                      {i.name || i.title}
+                    </h4>
+                    <p className="text-sm text-[#4A4A4A] opacity-90">
+                      {i.description || i.content}
+                    </p>
+                  </div>
+                  <button
+                    className="btn btn-xs bg-[#E86D6D] text-white hover:bg-[#d65a5a]"
+                    onClick={() => deleteItem(i.$id)}
+                    disabled={adding || loading}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm text-center py-4">
+                No records found.
+              </p>
+            )}
+          </div>
 
-        {/* Input Fields */}
-        <input
-          type="text"
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="input input-bordered w-full mb-2"
-        />
-        <textarea
-          placeholder="Content"
-          value={form.content}
-          onChange={(e) => setForm({ ...form, content: e.target.value })}
-          className="textarea textarea-bordered w-full"
-        />
+          {/* Form Inputs */}
+          <input
+            type="text"
+            placeholder="Name / Title"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="input w-full bg-[#FFF8EA] border border-[#DCD1B4] mb-2 text-[#1E2B1F] placeholder-[#9C8E71]"
+          />
+          <textarea
+            placeholder="Description / Content"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="textarea w-full bg-[#FFF8EA] border border-[#DCD1B4] text-[#1E2B1F] placeholder-[#9C8E71]"
+          />
 
-        {/* Footer / Actions */}
-        <div className="modal-action">
-          <button
-            onClick={handleAdd}
-            disabled={adding || loading}
-            className={`btn btn-primary ${adding ? "loading" : ""}`}
-          >
-            {adding ? "Adding..." : "Add"}
-          </button>
-          <button
-            className="btn btn-ghost"
-            onClick={onClose}
-            disabled={adding || loading}
-          >
-            Close
-          </button>
-        </div>
-      </div>
+          {/* Footer */}
+          <div className="modal-action">
+            {title === "Dental Notes" ? (
+              <button
+                onClick={handleAdd}
+                disabled={adding || loading}
+                className={`btn border-0 text-white ${
+                  adding ? "loading" : ""
+                } bg-gradient-to-r from-[#A8E6CF] to-[#56C596] hover:opacity-90`}
+              >
+                {adding ? "Adding..." : "Add"}
+              </button>
+            ) : (
+              <span className="text-sm text-gray-500">Add disabled</span>
+            )}
+            <button
+              className="btn bg-[#E6D8BA] text-[#1E2B1F] hover:bg-[#DCD1B4]"
+              onClick={onClose}
+              disabled={adding || loading}
+            >
+              Close
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
       <form method="dialog" className="modal-backdrop">
         <button onClick={onClose}>close</button>

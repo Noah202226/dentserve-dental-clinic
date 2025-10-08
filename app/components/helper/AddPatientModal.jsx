@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiLoader } from "react-icons/fi";
 
 export default function AddPatientModal({
@@ -27,7 +27,33 @@ export default function AddPatientModal({
   const handleSave = () => {
     if (!form.patientName || !form.contact) return;
     onSave(form);
+    // reset state
+    setForm({
+      patientName: "",
+      address: "",
+      birthdate: "",
+      gender: "",
+      contact: "",
+      emergencyToContact: "",
+      emergencyToContactNumber: "",
+      note: "",
+    });
   };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setForm({
+        patientName: "",
+        address: "",
+        birthdate: "",
+        gender: "",
+        contact: "",
+        emergencyToContact: "",
+        emergencyToContactNumber: "",
+        note: "",
+      });
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -35,31 +61,35 @@ export default function AddPatientModal({
         id="add_patient_modal"
         className={`modal ${isOpen ? "modal-open" : ""}`}
       >
-        <div className="modal-box max-w-3xl bg-base-200 text-base-content rounded-2xl shadow-2xl border border-base-300">
-          <h3 className="font-bold text-2xl mb-4 text-primary flex items-center gap-2">
+        <div className="modal-box max-w-3xl bg-green-600 text-gray-800 rounded-2xl shadow-2xl border border-[#B3E6C2]">
+          <h3 className="font-bold text-2xl mb-4 text-white flex items-center gap-2">
             🧾 Add New Patient
           </h3>
 
           {/* Tabs */}
-          <div role="tablist" className="tabs tabs-boxed bg-base-300 mb-5">
+          <div
+            role="tablist"
+            className="tabs tabs-boxed bg-[#C9FDD7]/70 mb-5 rounded-xl"
+          >
+            {/* General Info */}
             <input
               type="radio"
               name="tabset"
               role="tab"
-              className="tab"
+              className="tab text-green-500 font-semibold"
               aria-label="General Info"
               defaultChecked
               id="tab-general"
             />
             <div
               role="tabpanel"
-              className="tab-content p-4 bg-base-200"
+              className="tab-content p-4 bg-[#E9FFF0] rounded-xl"
               htmlFor="tab-general"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">Full Name</span>
+                    <span className="label-text text-gray-700">Full Name</span>
                   </label>
                   <input
                     type="text"
@@ -67,18 +97,18 @@ export default function AddPatientModal({
                     placeholder="Enter full name"
                     value={form.patientName}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">Gender</span>
+                    <span className="label-text text-gray-700">Gender</span>
                   </label>
                   <select
                     name="gender"
                     value={form.gender}
                     onChange={handleChange}
-                    className="select select-bordered w-full bg-base-300"
+                    className="select select-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   >
                     <option value="">Select</option>
                     <option>Male</option>
@@ -87,19 +117,19 @@ export default function AddPatientModal({
                 </div>
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">Birthdate</span>
+                    <span className="label-text text-gray-700">Birthdate</span>
                   </label>
                   <input
                     type="date"
                     name="birthdate"
                     value={form.birthdate}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full  bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">
+                    <span className="label-text text-gray-700">
                       Contact Number
                     </span>
                   </label>
@@ -109,12 +139,12 @@ export default function AddPatientModal({
                     placeholder="Enter contact number"
                     value={form.contact}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
                 <div className="md:col-span-2">
                   <label className="label">
-                    <span className="label-text text-gray-300">Address</span>
+                    <span className="label-text text-gray-700">Address</span>
                   </label>
                   <input
                     type="text"
@@ -122,29 +152,30 @@ export default function AddPatientModal({
                     placeholder="Enter address"
                     value={form.address}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Emergency Info */}
             <input
               type="radio"
               name="tabset"
               role="tab"
-              className="tab"
+              className="tab text-green-500 font-semibold"
               aria-label="Emergency"
               id="tab-emergency"
             />
             <div
               role="tabpanel"
-              className="tab-content p-4 bg-base-200"
+              className="tab-content p-4 bg-[#E9FFF0] rounded-xl"
               htmlFor="tab-emergency"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">
+                    <span className="label-text text-gray-700">
                       Emergency Contact Name
                     </span>
                   </label>
@@ -154,12 +185,12 @@ export default function AddPatientModal({
                     placeholder="Enter emergency contact name"
                     value={form.emergencyToContact}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
                 <div>
                   <label className="label">
-                    <span className="label-text text-gray-300">
+                    <span className="label-text text-gray-700">
                       Emergency Contact Number
                     </span>
                   </label>
@@ -169,27 +200,28 @@ export default function AddPatientModal({
                     placeholder="Enter emergency number"
                     value={form.emergencyToContactNumber}
                     onChange={handleChange}
-                    className="input input-bordered w-full bg-base-300"
+                    className="input input-bordered w-full bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Notes */}
             <input
               type="radio"
               name="tabset"
               role="tab"
-              className="tab"
+              className="tab text-green-500 font-semibold"
               aria-label="Note"
               id="tab-note"
             />
             <div
               role="tabpanel"
-              className="tab-content p-4 bg-base-200"
+              className="tab-content p-4 bg-[#E9FFF0] rounded-xl"
               htmlFor="tab-note"
             >
               <label className="label">
-                <span className="label-text text-gray-300">
+                <span className="label-text text-gray-700">
                   Additional Notes
                 </span>
               </label>
@@ -198,7 +230,7 @@ export default function AddPatientModal({
                 placeholder="Enter any important notes..."
                 value={form.note}
                 onChange={handleChange}
-                className="textarea textarea-bordered w-full h-32 bg-base-300"
+                className="textarea textarea-bordered w-full h-32 bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
               />
             </div>
           </div>
@@ -206,14 +238,16 @@ export default function AddPatientModal({
           {/* Buttons */}
           <div className="flex justify-end mt-6 gap-3">
             <button
-              className="btn btn-ghost"
+              className="btn btn-outline border-[#B3E6C2] text-gray-700 hover:bg-[#D9FFE5] rounded-xl"
               onClick={() => setIsOpen(false)}
               disabled={loading}
             >
               Cancel
             </button>
             <button
-              className={`btn btn-primary ${loading ? "btn-disabled" : ""}`}
+              className={`btn bg-green-500 hover:bg-green-400 text-white border-none rounded-xl shadow-md ${
+                loading ? "opacity-70 cursor-not-allowed" : "hover:scale-105"
+              }`}
               onClick={handleSave}
             >
               {loading ? (

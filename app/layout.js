@@ -6,19 +6,53 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./stores/authStore";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function RootLayout({ children }) {
   useInitTheme();
-  const { current } = useAuthStore((state) => state);
+
+  const { login, register, getCurrentUser, current, loading } = useAuthStore(
+    (state) => state
+  );
+  const [isSignUp, setIsSignUp] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, [getCurrentUser]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const user = await login(form.get("email"), form.get("password"));
+    if (user) router.push("/"); // ✅ safe navigation
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const user = await register(form.get("email"), form.get("password"));
+    if (user) router.push("/"); // ✅ safe navigation
+  };
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-base-100 text-base-content transition-colors duration-300 ">
+      <body className="transition-colors duration-300 ">
         {/* ✅ Show header + footer only if no user */}
-        {!current && <Header />}
+        {/* {!current && <Header />} */}
         <main className="min-h-screen">{children}</main>
-        {!current && <Footer />}
+        {/* {!current && <Footer />} */}
 
+        <div
+          className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"
+          style={{
+            backgroundImage: "url('/dentserve-logo.png')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "400px",
+          }}
+        ></div>
         <Toaster
           position="top-right"
           toastOptions={{

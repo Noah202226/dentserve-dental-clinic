@@ -33,42 +33,44 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   return (
     <>
       <div className="modal modal-open z-40">
-        <div className="modal-box w-full sm:w-11/12 max-w-5xl rounded-2xl shadow-xl p-0 max-h-[90vh] flex flex-col relative">
+        <div className="modal-box w-full sm:w-11/12 max-w-5xl rounded-2xl shadow-2xl p-0 max-h-[90vh] flex flex-col relative bg-white border border-mint-300">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-4 sm:px-6 py-4 sticky top-0 z-10">
+          <div className="bg-gradient-to-r from-green-600 to-mint-500 text-white px-4 sm:px-6 py-4 sticky top-0 z-10 rounded-t-2xl">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold truncate">
               {patient.patientName}
             </h2>
             <p className="mt-1 text-sm opacity-90">
               Payment Balance:{" "}
-              <span className="font-semibold text-yellow-300">
+              <span className="font-semibold text-yellow-200">
                 ₱{patient.balance || "0.00"}
               </span>
             </p>
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4">
+          <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 bg-mint-50">
             {/* Patient Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <Detail label="Email" value={patient.email} />
+              {/* <Detail label="Email" value={patient.email} /> */}
               <Detail label="Gender" value={patient.gender} />
               <Detail label="Address" value={patient.address} />
-              <Detail label="Birthdate" value={patient.birthdate} />
+              <Detail
+                label="Birthdate"
+                value={new Date(patient.birthdate).toLocaleDateString()}
+              />
               <Detail label="Contact Number" value={patient.contact} />
             </div>
 
             {/* Sections */}
-            <div className="mt-6 border-t pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="mt-6 border-t border-mint-300 pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {sectionsLoading ? (
-                // 🔹 Show skeleton placeholders while any section is loading
                 [...Array(4)].map((_, i) => (
                   <div
                     key={i}
-                    className="p-4 bg-base-200 rounded-xl animate-pulse h-20"
+                    className="p-4 bg-mint-100 rounded-xl animate-pulse h-20"
                   >
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-4 bg-green-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-green-200 rounded w-1/2"></div>
                   </div>
                 ))
               ) : (
@@ -105,20 +107,6 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
                     }
                   />
 
-                  {/* <SectionCard
-                    title="Payments"
-                    count={
-                      paymentStore.fullPayments.length +
-                      paymentStore.installments.length
-                    }
-                    onClick={() =>
-                      setActiveSection({
-                        title: "Payments",
-                        collectionId: "payments",
-                      })
-                    }
-                  /> */}
-
                   <PaymentSectionCard patient={patient} />
                 </>
               )}
@@ -126,8 +114,11 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
           </div>
 
           {/* Footer */}
-          <div className="modal-action border-t px-4 sm:px-6 py-3 bg-gray-50 sticky bottom-0 z-10">
-            <button onClick={onClose} className="btn btn-neutral">
+          <div className="modal-action border-t border-mint-300 px-4 sm:px-6 py-3 bg-mint-100 sticky bottom-0 z-10">
+            <button
+              onClick={onClose}
+              className="btn bg-green-500 hover:bg-green-600 text-white border-none"
+            >
               Close
             </button>
           </div>
@@ -158,8 +149,8 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
 function Detail({ label, value }) {
   return (
     <div className="flex flex-col">
-      <span className="text-sm font-semibold text-gray-600">{label}</span>
-      <span className="text-base text-gray-900">
+      <span className="text-sm font-semibold text-green-700">{label}</span>
+      <span className="text-base text-green-900">
         {value && value !== "" ? value : "—"}
       </span>
     </div>
@@ -170,13 +161,13 @@ function SectionCard({ title, count, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="p-4 bg-white rounded-xl shadow-sm border hover:shadow-md cursor-pointer transition"
+      className="p-4 bg-white rounded-xl shadow-sm border border-mint-300 hover:shadow-md hover:bg-mint-100 cursor-pointer transition"
     >
-      <h4 className="font-semibold text-gray-700 flex items-center justify-between">
+      <h4 className="font-semibold text-green-700 flex items-center justify-between">
         {title}
-        <span className="ml-2 text-indigo-600 text-sm">({count})</span>
+        <span className="ml-2 text-green-500 text-sm">({count})</span>
       </h4>
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="text-xs text-green-600 mt-1">
         {count > 0 ? "View details" : `Add ${title}`}
       </p>
     </div>
