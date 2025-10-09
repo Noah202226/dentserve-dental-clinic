@@ -69,10 +69,12 @@ export default function PatientsSection() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-green-600 flex items-center gap-2">
             👥 Patients
           </h1>
-          <p className="text-sm text-white">Manage and view patient records</p>
+          <p className="text-sm text-green-600">
+            Manage and view patient records
+          </p>
         </div>
         <button
           onClick={() => setIsOpen(true)}
@@ -98,7 +100,7 @@ export default function PatientsSection() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="stat bg-green-400 backdrop-blur rounded-2xl p-4 shadow-md border border-[#B3E6C2]">
           <div className="stat-title text-gray-600">Total Patients</div>
-          <div className="stat-value text-primary">{patients.length}</div>
+          <div className="stat-value text-white">{patients.length}</div>
         </div>
         <div className="stat bg-green-400 backdrop-blur rounded-2xl p-4 shadow-md border border-[#B3E6C2]">
           <div className="stat-title text-gray-600">Active Patients</div>
@@ -148,11 +150,11 @@ export default function PatientsSection() {
                         key={patient.$id}
                         className="hover:bg-[#D9FFE5]/70 transition-all"
                       >
-                        <td className="font-medium text-white">
+                        <td className="font-medium text-green-600">
                           {patient.patientName}
                         </td>
-                        <td className="text-white">{patient.address}</td>
-                        <td className="text-white">{patient.contact}</td>
+                        <td className="text-green-600">{patient.address}</td>
+                        <td className="text-green-600">{patient.contact}</td>
                         <td className="flex gap-2 justify-center">
                           <button
                             className="btn btn-sm bg-green-500 hover:bg-[#2CA6E0] text-white border-none rounded-lg flex items-center gap-1"

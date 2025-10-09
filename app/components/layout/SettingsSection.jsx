@@ -15,7 +15,7 @@ export default function SettingsSection() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold mb-4 text-white">⚙️ Settings</h1>
+      <h1 className="text-2xl font-bold mb-4 text-green-500">⚙️ Settings</h1>
       {/* Tabs */}
       <div className="flex space-x-2 border-b border-green-200/50">
         {["Personalization", "Services", "Dentist"].map((tab) => (

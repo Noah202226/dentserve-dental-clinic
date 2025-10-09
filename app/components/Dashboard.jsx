@@ -67,16 +67,14 @@ export default function DashboardPage() {
     fetchPersonalization();
   }, []);
   return (
-    <div className="drawer lg:drawer-open bg-green-50 text-gray-800">
+    <div className="drawer lg:drawer-open bg-white text-gray-800">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
 
       {/* Main content */}
       <div className="drawer-content flex flex-col">
         <TopBar />
 
-        <div className="flex-1 overflow-y-auto bg-green-700">
-          {renderSection()}
-        </div>
+        <div className="flex-1 overflow-y-auto bg-white">{renderSection()}</div>
       </div>
 
       {/* Sidebar */}
@@ -122,7 +120,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Footer / Settings */}
-          <div className="p-4 border-t border-green-100 bg-green-50">
+          <div className="p-4 border-t border-green-100 bg-white">
             <ul className="menu">
               <li className="menu-title text-green-900 font-semibold">
                 System

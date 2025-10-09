@@ -60,7 +60,7 @@ export default function SubSectionModal({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="modal-box max-w-lg bg-[#FAF3E0] text-[#1E2B1F] shadow-xl border border-[#DCD1B4] rounded-2xl"
+          className="modal-box max-w-lg bg-white text-[#1E2B1F] shadow-xl border border-[#DCD1B4] rounded-2xl"
         >
           {/* Header */}
           <div className="flex justify-between items-center border-b border-[#E6D8BA] pb-3 mb-3">

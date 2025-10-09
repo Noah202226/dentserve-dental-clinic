@@ -207,8 +207,10 @@ export default function ReportsAnalytics() {
       {/* Header */}
       <div className="flex justify-between items-center border-b border-green-400 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Reports & Analytics</h1>
-          <p className="text-gray-300">
+          <h1 className="text-2xl font-bold text-green-500">
+            Reports & Analytics
+          </h1>
+          <p className="text-gray-500">
             View and filter all financial transactions.
           </p>
         </div>
