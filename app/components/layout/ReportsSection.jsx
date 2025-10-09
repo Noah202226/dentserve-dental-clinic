@@ -32,6 +32,7 @@ export default function ReportsAnalytics() {
         amount: parseFloat(t.totalAmount || 0),
         date: new Date(t.$createdAt),
         patientId: t.patientId || "N/A",
+        patientName: t.patientName,
       })),
       ...installments.map((i) => ({
         id: i.$id,
@@ -39,6 +40,7 @@ export default function ReportsAnalytics() {
         amount: parseFloat(i.amount || 0),
         date: new Date(i.dateTransact || i.$createdAt),
         patientId: i.patientId || "N/A",
+        patientName: t.patientName,
       })),
     ];
 
@@ -333,7 +335,7 @@ export default function ReportsAnalytics() {
                     {allPayments.map((p) => (
                       <tr
                         key={p.id}
-                        className="hover:bg-green-50 transition text-gray-700"
+                        className="hover:bg-green-50 transition text-gray-800"
                       >
                         <td>{p.date.toLocaleString()}</td>
                         <td>{p.patientName}</td>
@@ -349,13 +351,13 @@ export default function ReportsAnalytics() {
                             {p.type}
                           </span>
                         </td>
-                        <td className="font-medium text-green-600">
+                        <td className="font-medium text-200-600">
                           ₱{p.amount.toLocaleString()}
                         </td>
                         <td className="text-center">
                           <button
                             onClick={() => handleDelete(p)}
-                            className="text-red-500 hover:text-red-600 transition"
+                            className="text-red-500 hover:text-red-600 transition hover:cursor-pointer"
                           >
                             <FiTrash2 size={18} />
                           </button>

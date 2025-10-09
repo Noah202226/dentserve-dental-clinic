@@ -58,7 +58,7 @@ export default function PersonalizationSettings() {
           </label>
           <input
             type="text"
-            className="input input-bordered text-white w-full border-green-300"
+            className="input input-bordered text-green-600 w-full border-green-300"
             placeholder="e.g. DentServe Dental Clinic"
             value={form.businessName}
             onChange={(e) => setForm({ ...form, businessName: e.target.value })}
@@ -71,7 +71,7 @@ export default function PersonalizationSettings() {
           <input
             type="text"
             maxLength={2}
-            className="input input-bordered text-white w-full border-green-300"
+            className="input input-bordered text-green-600 w-full border-green-300"
             placeholder="e.g. DS"
             value={form.initial}
             onChange={(e) => setForm({ ...form, initial: e.target.value })}

@@ -61,7 +61,7 @@ export default function AddPatientModal({
         id="add_patient_modal"
         className={`modal ${isOpen ? "modal-open" : ""}`}
       >
-        <div className="modal-box max-w-3xl bg-green-600 text-gray-800 rounded-2xl shadow-2xl border border-[#B3E6C2]">
+        <div className="modal-box max-w-3xl bg-white text-gray-800 rounded-2xl shadow-2xl border border-[#B3E6C2]">
           <h3 className="font-bold text-2xl mb-4 text-white flex items-center gap-2">
             🧾 Add New Patient
           </h3>
