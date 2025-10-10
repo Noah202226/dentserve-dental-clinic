@@ -36,7 +36,7 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
               type="email"
               name="email"
               placeholder="Enter your email"
-              defaultValue={"testuser@gmail.com"} // test only
+              // defaultValue={} // test only
               required
               className="grow text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none"
             />
@@ -56,7 +56,7 @@ export default function AuthForm({ handleSubmit, submitType, onToggle }) {
               type="password"
               name="password"
               placeholder="Enter your password"
-              defaultValue={"testpassword"} // test only
+              // defaultValue={} // test only
               required
               className="grow text-gray-800 placeholder:text-gray-400 bg-transparent focus:outline-none"
             />
