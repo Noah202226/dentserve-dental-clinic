@@ -142,13 +142,20 @@ export default function SubSectionModal({
                     <h4 className="font-semibold text-[#1E2B1F]">
                       {i.name || i.medicalName || i.treatmentNote}
                     </h4>
-                    <p className="text-sm text-[#4A4A4A] opacity-90">
+                    {/* <p className="text-sm text-[#4A4A4A] opacity-90">
                       {i.description ||
                         i.status ||
                         (i.treatmentDate
                           ? new Date(i.treatmentDate).toLocaleString()
                           : "")}
-                    </p>
+                    </p> */}
+                    <pre className="text-sm text-[#4A4A4A] opacity-90">
+                      {i.description ||
+                        i.status ||
+                        (i.treatmentDate
+                          ? new Date(i.treatmentDate).toLocaleString()
+                          : "")}
+                    </pre>
                   </div>
                   <div className="flex gap-2">
                     <button
