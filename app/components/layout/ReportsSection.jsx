@@ -218,7 +218,7 @@ export default function ReportsAnalytics() {
         </div>
         <button
           onClick={handleExportPDF}
-          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition"
+          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-xs md:text-sm px-4 py-2 rounded-lg shadow transition"
         >
           <FiDownload /> Download PDF
         </button>

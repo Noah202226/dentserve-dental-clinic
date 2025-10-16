@@ -78,9 +78,19 @@ export default function DashboardPage() {
       </div>
 
       {/* Sidebar */}
-      <div className="drawer-side">
+      <div className="drawer-side z-50">
         <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
-        <aside className="w-64 bg-white border-r border-green-100 shadow-sm flex flex-col">
+        <aside className="w-64 bg-white border-r border-green-100 shadow-sm flex flex-col relative">
+          {/* Close Button */}
+          <button
+            className="md:hidden absolute top-5 right-2 btn btn-xs btn-circle btn-ghost text-white bg-green-500"
+            onClick={() =>
+              (document.getElementById("dashboard-drawer").checked = false)
+            }
+          >
+            ✕
+          </button>
+
           {/* Logo */}
           <div className="p-5 border-b border-green-100">
             <h2 className="text-2xl font-bold text-green-600">
@@ -90,14 +100,17 @@ export default function DashboardPage() {
 
           {/* Sidebar Menu */}
           <div className="flex-1 overflow-y-auto">
-            <ul className="menu p-4  gap-2 uppercase text-gray-500 text-sm tracking-wide">
+            <ul className="menu p-4 gap-2 uppercase text-gray-500 text-sm tracking-wide">
               <li className="menu-title text-green-900 font-semibold">
                 Management
               </li>
               <li>
                 <a
                   className={getLinkClasses("patients")}
-                  onClick={() => setActiveSection("patients")}
+                  onClick={() => {
+                    setActiveSection("patients");
+                    document.getElementById("dashboard-drawer").checked = false;
+                  }}
                 >
                   <FiUsers /> Patients
                 </a>
@@ -111,7 +124,10 @@ export default function DashboardPage() {
               <li>
                 <a
                   className={getLinkClasses("reports")}
-                  onClick={() => setActiveSection("reports")}
+                  onClick={() => {
+                    setActiveSection("reports");
+                    document.getElementById("dashboard-drawer").checked = false;
+                  }}
                 >
                   <FiBarChart2 /> Reports
                 </a>
@@ -128,7 +144,10 @@ export default function DashboardPage() {
               <li>
                 <a
                   className={getLinkClasses("settings")}
-                  onClick={() => setActiveSection("settings")}
+                  onClick={() => {
+                    setActiveSection("settings");
+                    document.getElementById("dashboard-drawer").checked = false;
+                  }}
                 >
                   <FiSettings /> Settings
                 </a>
