@@ -78,7 +78,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Sidebar */}
-      <div className="drawer-side z-50">
+      <div className="drawer-side z-50 md:z-10">
         <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
         <aside className="w-64 bg-white border-r border-green-100 shadow-sm flex flex-col relative">
           {/* Close Button */}
