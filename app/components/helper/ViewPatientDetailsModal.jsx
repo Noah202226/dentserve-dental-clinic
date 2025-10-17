@@ -259,6 +259,12 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
 }
 
 function EditableField({ label, name, value, editMode, onChange, type }) {
+  // Normalize value for <input type="date" />
+  const formattedValue =
+    type === "date" && value
+      ? new Date(value).toISOString().split("T")[0]
+      : value || "";
+
   return (
     <div className="flex flex-col">
       <span className="text-sm font-semibold text-green-700">{label}</span>
@@ -266,7 +272,7 @@ function EditableField({ label, name, value, editMode, onChange, type }) {
         type === "textarea" ? (
           <textarea
             className="textarea textarea-bordered text-black bg-green-300 w-full"
-            value={value || ""}
+            value={formattedValue}
             onChange={(e) =>
               onChange((prev) => ({ ...prev, [name]: e.target.value }))
             }
@@ -275,14 +281,22 @@ function EditableField({ label, name, value, editMode, onChange, type }) {
           <input
             type={type || "text"}
             className="input input-bordered text-black bg-green-300 w-full"
-            value={value || ""}
+            value={formattedValue}
             onChange={(e) =>
               onChange((prev) => ({ ...prev, [name]: e.target.value }))
             }
           />
         )
       ) : (
-        <span className="text-base text-green-900">{value || "—"}</span>
+        <span className="text-base text-green-900">
+          {type === "date" && value
+            ? new Date(value).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            : value || "—"}
+        </span>
       )}
     </div>
   );
