@@ -20,7 +20,8 @@ export const usePatientStore = create((set, get) => ({
     try {
       const res = await databases.listDocuments(
         DATABASE_ID,
-        PATIENTS_COLLECTION_ID
+        PATIENTS_COLLECTION_ID,
+        [Query.limit(1000)]
       );
       set({ patients: res.documents, loading: false });
     } catch (error) {

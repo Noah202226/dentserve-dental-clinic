@@ -131,10 +131,10 @@ export default function PatientsSection() {
 
         {/* Table */}
         <div className="flex-1 overflow-hidden mt-4">
-          <div className="h-75 overflow-y-auto pr-2">
+          <div className="h-[55vh] overflow-y-auto pr-2">
             {/* Desktop Table */}
             <div className="hidden md:block">
-              <table className="table w-full rounded-xl overflow-hidden border border-[#B3E6C2]">
+              <table className="table w-full h-full rounded-xl overflow-hidden border border-[#B3E6C2]">
                 <thead className="sticky top-0 bg-green-500 text-gray-600 z-10">
                   <tr className="text-sm text-white">
                     <th>Name</th>

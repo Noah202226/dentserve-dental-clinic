@@ -23,9 +23,11 @@ export const usePaymentStore = create((set, get) => ({
       const [txnRes, instRes] = await Promise.all([
         databases.listDocuments(DATABASE_ID, TRANSACTIONS_COLLECTION_ID, [
           Query.equal("patientId", patientId),
+          [Query.limit(1000)],
         ]),
         databases.listDocuments(DATABASE_ID, INSTALLMENTS_COLLECTION_ID, [
           Query.equal("patientId", patientId),
+          [Query.limit(1000)],
         ]),
       ]);
 

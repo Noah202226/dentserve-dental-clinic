@@ -21,7 +21,7 @@ export const createSectionStore = (collectionId, label) =>
             const res = await databases.listDocuments(
               DATABASE_ID,
               collectionId,
-              [Query.equal("patientId", patientId)]
+              [Query.equal("patientId", patientId), [Query.limit(1000)]]
             );
             set({ items: res.documents });
           } catch (err) {

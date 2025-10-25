@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import { databases, ID } from "../lib/appwrite";
-import { Query } from "appwrite";
 import toast from "react-hot-toast";
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
