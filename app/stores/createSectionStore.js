@@ -21,7 +21,11 @@ export const createSectionStore = (collectionId, label) =>
             const res = await databases.listDocuments(
               DATABASE_ID,
               collectionId,
-              [Query.equal("patientId", patientId), Query.limit(1000)]
+              [
+                Query.equal("patientId", patientId),
+                Query.limit(1000),
+                Query.orderDesc("$createdAt"),
+              ],
             );
             set({ items: res.documents });
           } catch (err) {
@@ -41,7 +45,7 @@ export const createSectionStore = (collectionId, label) =>
 
           // Basic validation
           const hasAnyValue = Object.values(data).some(
-            (v) => v !== "" && v !== null && v !== undefined
+            (v) => v !== "" && v !== null && v !== undefined,
           );
           if (!hasAnyValue) return toast.error("Please fill in the form.");
 
@@ -56,7 +60,7 @@ export const createSectionStore = (collectionId, label) =>
               DATABASE_ID,
               collectionId,
               ID.unique(),
-              payload
+              payload,
             );
 
             set({ items: [doc, ...get().items] });
@@ -78,11 +82,11 @@ export const createSectionStore = (collectionId, label) =>
               DATABASE_ID,
               collectionId,
               id,
-              data
+              data,
             );
             set({
               items: get().items.map((i) =>
-                i.$id === id ? { ...i, ...updated } : i
+                i.$id === id ? { ...i, ...updated } : i,
               ),
             });
             toast.success(`${label} updated!`);
@@ -113,6 +117,6 @@ export const createSectionStore = (collectionId, label) =>
       }),
       {
         name: `${collectionId}-store`,
-      }
-    )
+      },
+    ),
   );
