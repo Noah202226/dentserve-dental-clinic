@@ -1,41 +1,56 @@
-"use client";
-
 import "./globals.css";
 import { useInitTheme } from "./components/layout/ThemeProvider";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./stores/authStore";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+
+const APP_NAME = "Dentserve";
+const APP_DEFAULT_TITLE = "Dentserve - Your Dental Service App";
+const APP_TITLE_TEMPLATE = "%s - PWA App";
+const APP_DESCRIPTION = "Best PWA app in the world!";
+
+export const metadata = {
+  applicationName: APP_NAME,
+  title: {
+    default: APP_DEFAULT_TITLE,
+    template: APP_TITLE_TEMPLATE,
+  },
+  description: APP_DESCRIPTION,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: APP_DEFAULT_TITLE,
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: APP_NAME,
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary",
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
+};
+
+export const viewport = {
+  themeColor: "#FFFFFF",
+};
 
 export default function RootLayout({ children }) {
-  useInitTheme();
-
-  const { login, register, getCurrentUser, current, loading } = useAuthStore(
-    (state) => state
-  );
-  const [isSignUp, setIsSignUp] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    getCurrentUser();
-  }, [getCurrentUser]);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
-    const user = await login(form.get("email"), form.get("password"));
-    if (user) router.push("/"); // ✅ safe navigation
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
-    const user = await register(form.get("email"), form.get("password"));
-    if (user) router.push("/"); // ✅ safe navigation
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="transition-colors duration-300 ">
