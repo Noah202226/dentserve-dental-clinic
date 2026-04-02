@@ -11,6 +11,7 @@ import { useTreatmentPlanStore } from "../../stores/useTreatmentPlanStore";
 import { usePaymentStore } from "@/app/stores/usePaymentStore";
 import PaymentModal from "./PaymentModal";
 import PaymentSectionCard from "./PaymentSectionCard";
+import ConsentFormModal from "./ConsentFormModal";
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
 const PATIENTS_COLLECTION_ID = "patients";
@@ -20,6 +21,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   const [editMode, setEditMode] = useState(false);
   const [updatedPatient, setUpdatedPatient] = useState({ ...patient });
   const [saving, setSaving] = useState(false);
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
 
   const notes = useNotesStore();
   const medHistory = useMedicalHistoryStore();
@@ -62,7 +64,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
         DATABASE_ID,
         PATIENTS_COLLECTION_ID,
         patient.$id,
-        updatedPatient
+        updatedPatient,
       );
       toast.success("Patient details updated");
       setEditMode(false);
@@ -90,7 +92,15 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
                   ₱{patient.balance || "0.00"}
                 </span>
               </p>
+
+              <button
+                onClick={() => setIsConsentModalOpen(true)}
+                className="btn btn-sm border-none bg-white text-[#00A388] hover:bg-green-100 mt-2"
+              >
+                View Consent Form
+              </button>
             </div>
+
             <button
               onClick={() => setEditMode((prev) => !prev)}
               className="btn btn-sm border-none bg-white text-green-700 hover:bg-green-100"
@@ -252,6 +262,14 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
         <PaymentModal
           patientId={patient.$id}
           onClose={() => setActiveSection(null)}
+        />
+      )}
+
+      {isConsentModalOpen && (
+        <ConsentFormModal
+          patient={updatedPatient}
+          calculateAge={calculateAge}
+          onClose={() => setIsConsentModalOpen(false)}
         />
       )}
     </>
