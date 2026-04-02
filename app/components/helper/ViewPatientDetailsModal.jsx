@@ -126,6 +126,19 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
                 editMode={editMode}
                 onChange={setUpdatedPatient}
               />
+
+              <EditableField
+                label="Age"
+                name="age"
+                value={
+                  calculateAge(updatedPatient.birthdate)
+                    ? `${calculateAge(updatedPatient.birthdate)} years`
+                    : ""
+                }
+                editMode={editMode}
+                onChange={setUpdatedPatient}
+              />
+
               <EditableField
                 label="Address"
                 name="address"
@@ -173,9 +186,6 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
             </div>
 
             {/* Age Display */}
-            <p className="mt-3 text-sm text-gray-600">
-              Age: {calculateAge(updatedPatient.birthdate)} years old
-            </p>
 
             {/* Sections */}
             <div className="mt-6 border-t border-mint-300 pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

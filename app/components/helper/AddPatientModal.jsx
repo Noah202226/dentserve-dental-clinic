@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
 
 export default function AddPatientModal({
@@ -14,6 +15,7 @@ export default function AddPatientModal({
     address: "",
     birthdate: "",
     gender: "",
+    age: "",
     contact: "",
     emergencyToContact: "",
     emergencyToContactNumber: "",
@@ -25,7 +27,10 @@ export default function AddPatientModal({
   };
 
   const handleSave = () => {
-    if (!form.patientName || !form.contact) return;
+    if (!form.patientName) {
+      toast.error("Please fill in the required fields: Patient Name");
+      return;
+    }
     onSave(form);
     // reset state
     setForm({
@@ -33,6 +38,7 @@ export default function AddPatientModal({
       address: "",
       birthdate: "",
       gender: "",
+      age: "",
       contact: "",
       emergencyToContact: "",
       emergencyToContactNumber: "",
@@ -62,28 +68,28 @@ export default function AddPatientModal({
         className={`modal ${isOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-3xl bg-white text-gray-800 rounded-2xl shadow-2xl border border-[#B3E6C2]">
-          <h3 className="font-bold text-2xl mb-4 text-white flex items-center gap-2">
+          <h3 className="font-bold text-2xl mb-4 text-black flex items-center gap-2">
             🧾 Add New Patient
           </h3>
 
           {/* Tabs */}
           <div
             role="tablist"
-            className="tabs tabs-boxed bg-[#C9FDD7]/70 mb-5 rounded-xl"
+            className="tabs  bg-[#C9FDD7]/70 mb-5 rounded-xl peer-checked: text-red-500"
           >
             {/* General Info */}
             <input
               type="radio"
               name="tabset"
               role="tab"
-              className="tab text-green-500 font-semibold"
-              aria-label="General Info"
+              className="tab text-green-500 font-semibold peer-checked:bg-red-500 peer-checked:text-black rounded-xl"
+              aria-label="General Infos"
               defaultChecked
               id="tab-general"
             />
             <div
               role="tabpanel"
-              className="tab-content p-4 bg-[#E9FFF0] rounded-xl"
+              className="tab-content p-4 bg-[#E9FFF0] rounded-xl text-black"
               htmlFor="tab-general"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -115,6 +121,20 @@ export default function AddPatientModal({
                     <option>Female</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="label">
+                    <span className="label-text text-gray-700">Age</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={form.age}
+                    onChange={handleChange}
+                    className="input input-bordered w-full  bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
+                  />
+                </div>
+
                 <div>
                   <label className="label">
                     <span className="label-text text-gray-700">Birthdate</span>
@@ -127,6 +147,7 @@ export default function AddPatientModal({
                     className="input input-bordered w-full  bg-[#D9FFE5] border-[#B3E6C2] text-gray-800 rounded-xl"
                   />
                 </div>
+
                 <div>
                   <label className="label">
                     <span className="label-text text-gray-700">
@@ -163,7 +184,7 @@ export default function AddPatientModal({
               type="radio"
               name="tabset"
               role="tab"
-              className="tab text-green-500 font-semibold"
+              className="tab text-green-500 font-semibold text-amber-950 peer-checked:bg-green-500 peer-checked:text-white rounded-xl"
               aria-label="Emergency"
               id="tab-emergency"
             />
