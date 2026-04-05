@@ -53,6 +53,7 @@ export default function AddPatientModal({
         address: "",
         birthdate: "",
         gender: "",
+        age: "",
         contact: "",
         emergencyToContact: "",
         emergencyToContactNumber: "",
@@ -184,7 +185,7 @@ export default function AddPatientModal({
               type="radio"
               name="tabset"
               role="tab"
-              className="tab text-green-500 font-semibold text-amber-950 peer-checked:bg-green-500 peer-checked:text-white rounded-xl"
+              className="tab font-semibold text-amber-950 peer-checked:bg-green-500 peer-checked:text-white rounded-xl"
               aria-label="Emergency"
               id="tab-emergency"
             />
