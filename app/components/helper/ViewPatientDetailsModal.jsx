@@ -79,7 +79,7 @@ export default function ViewPatientDetailsModal({ patient, isOpen, onClose }) {
   return (
     <>
       <div className="modal modal-open z-40">
-        <div className="modal-box w-full sm:w-11/12 max-w-5xl rounded-2xl shadow-2xl p-0 max-h-[90vh] flex flex-col relative bg-white border border-mint-300">
+        <div className="modal-box w-full sm:w-11/12 max-w-7xl rounded-2xl shadow-2xl p-0 max-h-[90vh] flex flex-col relative bg-white border border-mint-300">
           {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-mint-500 text-white px-4 sm:px-6 py-4 sticky top-0 z-10 rounded-t-2xl flex justify-between items-center">
             <div>
